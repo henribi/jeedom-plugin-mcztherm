@@ -1,0 +1,24 @@
+{
+	"id" : "mcztherm",
+	"name" : "mcztherm",
+	"description" : "Thermostat pour pôele à pellets MCZ",
+	"licence" : "AGPL",
+	"author" : "henribi",
+	"require" : "4.1",
+	"category" : "wellness",
+	"changelog" : "https:\/\/henribi.github.io\/jeedom-plugins-documentation\/mcztherm\/#language#\/changelog",
+	"documentation" : "https:\/\/henribi.github.io\/jeedom-plugins-documentation\/mcztherm\/#language#\/",
+	"language" : ["fr_FR"],
+	"compatibility" : [
+		"miniplus",
+		"smart",
+		"rpi",
+		"docker",
+		"diy",
+		"mobile",
+		"v4"
+	],
+	"hasDependency" : false,
+	"hasOwnDeamon" : false,
+	"maxDependancyInstallTime" : 0
+}
