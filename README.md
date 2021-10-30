@@ -1,2 +1,3 @@
-# jeedom-plugin-mcztherm
-Ce plugin pour Jeedom permet de gérer le mode de chauffe d'un poêle à pellets de la gamme MCZ Maestro.
+# Plugin mcztherm
+
+Ce plugin se comporte comme un thermostat pour un poêle à pellets MCZ  de la gamme Maestro. 
