@@ -25,6 +25,34 @@ class mcztherm extends eqLogic {
 
 	/* ***********************Methode static*************************** */
 
+	private static function processMajDateHeure($mcztherm) {
+		$ts_curtime = strtotime(date('Y-m-d H:i:00'));
+		if (($mcztherm->getConfiguration('HeureMaj') != '') &&  ($mcztherm->getConfiguration('CmdMajDateHeure') != ''))  {
+			$heure = $mcztherm->getConfiguration('HeureMaj');
+			$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
+			$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
+			$ts_jour = strtotime(date('Y-m-d') . ' ' . $heure);
+			if ($ts_curtime == $ts_jour) {
+				$DateHeure = date('dmYHi');
+				if (is_object($mcztherm)) {
+					$cmdhb = $mcztherm->getCmd(null,'ordrepoele');
+					if (is_object($cmdhb)) {
+						$cmdhbname = $cmdhb->getHumanName();	
+						cmd::byString('#'.$cmdhbname.'#')->event('9001,' . $DateHeure);
+						$cmdmcz = $mcztherm->getConfiguration('CmdMajDateHeure');
+						if (isset($cmdmcz) && $cmdmcz != '') {
+							cmd::byId(str_replace('#','',$cmdmcz))->execCmd();
+						}
+						log::add('mcztherm','debug','  -  Heure poele mise à jour');
+					} else {
+						log::add('mcztherm','info', '   -  ordrepoele n\'est pas un objet');
+					}
+				} 	
+			}
+		} 
+	}
+
+
 	private static function processTempCommand($mcztherm, $temperature) {
 		// Récupère la Temp Consigne du poele
 		$tempConsignePoele = mcztherm::getCmdInfoValue($mcztherm, "InfoTConsignePoele");
@@ -264,6 +292,27 @@ class mcztherm extends eqLogic {
 		return($returnval);
 	}
 
+	private static function testEtatError($mcztherm) {
+		// teste si Etat reporte une erreur
+		// Return:   0: on continue   1: Une erreur et le signale
+		$returnval = 0;
+		$etat = mcztherm::getCmdInfoValue($mcztherm, 'InfoEtatPoele');
+
+		if (substr_compare($etat, 'Erreur', 0, strlen('Erreur'), true) == 0) {
+			// Envoi d'un message de notification
+			if ($mcztherm->getConfiguration('InfoEtatPoele') != '') {
+				$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
+				$options = array('title'=>'MCZ Maestro', 'message'=> $etat);
+				$cmd->execCmd($options, $cache = 0);
+				log::add('mcztherm', 'info', 'Notification: '. $etat);
+				$returnval = 1;
+			}
+		}
+		return($returnval);
+	}
+
+
+
 	private static function testLastOffDelay($mcztherm) {
 		// return: 0: delai minimum passé   1: délai pas dépassé ==> attendre
 		$returnval = 0;
@@ -290,10 +339,14 @@ class mcztherm extends eqLogic {
 			return;
 		}
 
+		// Synchronisation Date, Heure du poele
+		mcztherm::processMajDateHeure($mcztherm);
+
 		if ($mcztherm->getCache('lastAction', '') == '') {
 			$mcztherm->setCache('lastAction', date('1970-01-01 00:00:00'));
 			$mcztherm->setCache('currentMode', '--');
 		}
+
 
 		$cmdValue = $cmd->execCmd();
 		if ($cmdValue == 0) { // mcztherm est Off
@@ -310,6 +363,8 @@ class mcztherm extends eqLogic {
 			$currentMode = $mcztherm->getCache('currentMode', '');											
 			log::add('mcztherm','debug','**** Infos(begin): lastAction: ' . $lastAction . ' currentMode: ' . $currentMode);
 
+			// Teste si etat reporte une erreur ==> Notification
+			mcztherm::testEtatError($mcztherm);
 
 			// Examine si mode d'exclusion de l'état de la commande info 
 			if ($mcztherm::testExclusionEtat($mcztherm) == 1) {
@@ -488,6 +543,7 @@ class mcztherm extends eqLogic {
 					///// moved to processConsigneCommands:    $mcztherm->setCache('lastOff', date('Y-m-d H:i:00'));  // Sauve date/heure de l'arrêt
 				}
 			}
+			//mcztherm::processMajDateHeure($mcztherm);
 
 		}  // endof if ($cmdValue == 1)
 	}  //endof nextexec	
@@ -578,6 +634,12 @@ class mcztherm extends eqLogic {
 		if ($this->getConfiguration('EtatOff') === '') {
 			$this->setConfiguration('EtatOff', 'Eteint');
 		}
+
+		if ($this->getConfiguration('HeureMaj') === '') {
+			$this->setConfiguration('HeureMaj', '03:05');
+		}
+
+
 
 	}
 
@@ -818,6 +880,20 @@ class mcztherm extends eqLogic {
 		$action->setSubType('slider');
 		$action->setIsVisible(0);
 		$action->save();
+
+		$info = $this->getCmd(null, 'ordrepoele');
+		if (!is_object($info)) {
+			$info = new mczthermCmd();
+			$info->setLogicalId('ordrepoele');
+			$info->setName(__('ordrepoele', __FILE__));
+			$info->setIsVisible(0);
+			$info->setisHistorized(0);
+		}
+		$info->setOrder($order++);
+		$info->setEqLogic_id($this->getId());
+		$info->setType('info');
+		$info->setSubType('string');
+		$info->save();
 
 
 	}
