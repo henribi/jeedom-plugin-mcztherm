@@ -216,6 +216,11 @@ $("#bt_selectSondeExt").on('click', function () {
 		$('.eqLogicAttr[data-l1key=configuration][data-l2key=SondeExt]').value(result.human);
 	});
 });
+$("#bt_selectCmdMessage").on('click', function () {
+	jeedom.cmd.getSelectModal({cmd: {type: 'action', subType: 'message'}}, function (result) {
+		$('.eqLogicAttr[data-l1key=configuration][data-l2key=CmdMessage]').value(result.human);
+	});
+});
 $("#bt_selectCommandeMode").on('click', function () {
 	jeedom.cmd.getSelectModal({cmd: {type: 'info', subType: 'string'}}, function (result) {
 		$('.eqLogicAttr[data-l1key=configuration][data-l2key=CommandeMode]').value(result.human);
@@ -224,6 +229,11 @@ $("#bt_selectCommandeMode").on('click', function () {
 $("#bt_selectCmdTempMcz").on('click', function () {
 	jeedom.cmd.getSelectModal({cmd: {type: 'action', subType: 'other'}}, function (result) {
 		$('.eqLogicAttr[data-l1key=configuration][data-l2key=CmdTempMcz]').value(result.human);
+	});
+});
+$("#bt_selectCmdMajDateHeure").on('click', function () {
+	jeedom.cmd.getSelectModal({cmd: {type: 'action', subType: 'other'}}, function (result) {
+		$('.eqLogicAttr[data-l1key=configuration][data-l2key=CmdMajDateHeure]').value(result.human);
 	});
 });
 $("#bt_selectInfoEtatPoele").on('click', function () {
