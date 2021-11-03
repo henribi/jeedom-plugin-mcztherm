@@ -173,13 +173,34 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
+<!---
 						<div class="form-group">
-							<label class="col-sm-3 control-label">{{Sonde extérieure}}</label>
+							<label class="col-sm-3 control-label">{{Sonde extérieure}}(-)</label>
 							<div class="col-sm-4">
 								<div class="input-group">
 									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="SondeExt" placeholder="{{Sonde extérieure}}"/>
 									<span class="input-group-btn">
 										<a class="btn btn-default" id="bt_selectSondeExt" title="{{Sélectionner une commande}}">
+											<i class="fa fa-list-alt"></i>
+										</a>
+									</span>
+								</div>
+							</div>
+						</div>
+--->
+					</fieldset>
+				</form>
+				<!--- Divers --->
+				<legend><i class="fas"></i> {{Divers}}</legend>
+				<form class="form-horizontal">
+					<fieldset>
+		 				<div class="form-group">
+							<label class="col-sm-3 control-label">{{Commande message}}</label>
+							<div class="col-sm-4">
+								<div class="input-group">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="CmdMessage" placeholder="{{Commande message}}"/>
+									<span class="input-group-btn">
+										<a class="btn btn-default" id="bt_selectCmdMessage" title="{{Sélectionner une commande}}">
 											<i class="fa fa-list-alt"></i>
 										</a>
 									</span>
@@ -350,6 +371,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
+<!---
 						<div class="form-group">
 							<label class="col-sm-3 control-label">{{Profil actif}}</label>
 							<div class="col-sm-4">
@@ -441,6 +463,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
+--->
 						<div class="form-group">
 							<label class="col-sm-3 control-label">{{Consigne de température}}</label>
 							<div class="col-sm-4">
@@ -491,7 +514,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
-
 						<div class="form-group">
 							<label class="col-sm-3 control-label">{{Commande de température du poêle}}</label>
 							<div class="col-sm-4">
@@ -502,6 +524,27 @@ $eqLogics = eqLogic::byType($plugin->getId());
 											<i class="fa fa-list-alt"></i>
 										</a>
 									</span>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">{{Mise à jour Date/Heure}}</label>
+							<div class="col-sm-4">
+								<div class="input-group">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="CmdMajDateHeure" placeholder="{{Commande pour mettre à jour la date et l\'heure'}}"/>
+									<span class="input-group-btn">
+										<a class="btn btn-default" id="bt_selectCmdMajDateHeure" title="{{Sélectionner une commande}}">
+											<i class="fa fa-list-alt"></i>
+										</a>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">{{Heure de mise à jour}}</label>
+							<div class="col-sm-2">
+								<div class="input-group">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="HeureMaj" placeholder="{{HH:mm}}"/>
 								</div>
 							</div>
 						</div>
