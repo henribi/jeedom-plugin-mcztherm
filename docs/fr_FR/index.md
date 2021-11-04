@@ -21,7 +21,7 @@ Ce plugin est destiné à la création de thermostats dans Jeedom.
 ## La configuration en quelques clics
 
 
-![Aspect sur le Dashboard](./images/dashboard.png)
+![Aspect sur le Dashboard](../images/dashboard.png)
 
 Sur le dashboard, vous avez un bouton pour activer ou stopper le thermostat, un curseur pour spécifier la température de consigne.
 
@@ -39,7 +39,7 @@ Pour créer un nouveau thermostat, rendez-vous sur la page de configuration en d
 
 ### La configration générale
 
-![Configuration générale](./images/mcz_config_generale.png)
+![Configuration générale](../images/mcz_config_generale.png)
 
 Dans cette page de configuration, outre les informations habituelles pour un équipement, vous avez la possibilité d'activer ou pas un mode. De lui spécifier sa température dee consigne ainsi que son heure d'activation.
 
@@ -49,7 +49,7 @@ Si vous désirez être alerté en cas d'erreur du poêle, vous pouvez spécifier
 
 ### Les consignes
 
-![Configuration des consignes](./images/consignes.png)
+![Configuration des consignes](../images/consignes.png)
 
 Cette page permet de configurer les consignes de fonctionnement.
 
@@ -75,7 +75,7 @@ La valeur d'hystérèse est divisée en deux.  Une demi est ajoutée à la temp�
 
 ### Les infos
 
-![Infos du poêle](./images/infos_poele.png)
+![Infos du poêle](../images/infos_poele.png)
 
 Dans cet écran, vous avez les commandes à spécifier pour obtenir les informations du poêle et réagir en conséquence.
 
@@ -87,7 +87,7 @@ La dernière zone Consigne de température permet de connaître la consigne de t
 
 ### Les commandes 
 
-![Commandes du poêle](./images/commandes_poele.png)
+![Commandes du poêle](../images/commandes_poele.png)
 
 Dans cet écran, vous allez spécifier les commandes à utiliser pour allumer ou éteindre le poêle.
 
