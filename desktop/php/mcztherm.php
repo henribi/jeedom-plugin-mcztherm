@@ -477,8 +477,27 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
-						<br/><br/>
-
+						<div class="form-group">
+							<label class="col-sm-3 control-label">{{Niveau pellets}}</label>
+							<div class="col-sm-4">
+								<div class="input-group">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="InfoNiveauPellets" placeholder="{{Commande info indiquant le niveau de pellets}}"/>
+									<span class="input-group-btn">
+										<a class="btn btn-default" id="bt_selectInfoNiveauPellets" title="{{Sélectionner une commande}}">
+											<i class="fa fa-list-alt"></i>
+										</a>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-3 control-label">{{Valeur Niveau insuffisant}}</label>
+							<div class="col-sm-2">
+								<div class="input-group">
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="NiveauPelletsNOK" placeholder="{{Valeur}}"/>
+								</div>
+							</div>
+						</div>
 					</fieldset>
 				</form>
 			</div>
