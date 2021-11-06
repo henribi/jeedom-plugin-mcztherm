@@ -281,6 +281,11 @@ $("#bt_selectInfoTConsignePoele").on('click', function () {
 		$('.eqLogicAttr[data-l1key=configuration][data-l2key=InfoTConsignePoele]').value(result.human);
 	});
 });
+$("#bt_selectInfoNiveauPellets").on('click', function () {
+	jeedom.cmd.getSelectModal({cmd: {type: 'info', subType: 'string'}}, function (result) {
+		$('.eqLogicAttr[data-l1key=configuration][data-l2key=InfoNiveauPellets]').value(result.human);
+	});
+});
 $("#bt_selectCmdOnPoele").on('click', function () {
 	jeedom.cmd.getSelectModal({cmd: {type: 'action', subType: 'other'}}, function (result) {
 		$('.eqLogicAttr[data-l1key=configuration][data-l2key=CmdOnPoele]').value(result.human);

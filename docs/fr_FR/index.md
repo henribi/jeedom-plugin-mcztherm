@@ -83,7 +83,10 @@ L'information Valeur état off est le texte donnant l'état du poêle à l'état
 
 La zone Attente sur un état spécifie les textes renvoyés par le poêle pour lesquels il faut attendre. Il est inutile d'envoyer des commandes au poêle durant ces phases.
 
-La dernière zone Consigne de température permet de connaître la consigne de température connue du poêle.
+La zone Consigne de température permet de connaître la consigne de température connue du poêle.
+
+Les deux dernières zones permmetent l'envoi d'une notification si le niveau de pellets est presque vide.  
+Ne pas remplir la commande s'il n'y a pas de sonde de pellets installée. 
 
 ### Les commandes 
 
@@ -91,9 +94,13 @@ La dernière zone Consigne de température permet de connaître la consigne de t
 
 Dans cet écran, vous allez spécifier les commandes à utiliser pour allumer ou éteindre le poêle.
 
-Il y également la commande pour indiquer la température de consigne au poêle.
+Il y également la commande pour indiquer la température de consigne au poêle. Pour fonctionner, cette commande nécessite une configuration particulière.  
+Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur 42,*commande*  
+Vous insérez *commande* avec recherche équipement.  C'est la commande T_demandee de l'équipement mcztherm
 
-La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure d'exécution.
+La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure d'exécution.  
+La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info "ordrepoele" de l'équipement mcztherm.  
+Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur la commande "ordrepoele" de l'équipement mcztherm.
 
 > **Attention**
 >
@@ -101,6 +108,35 @@ La dernière commande permet d'effectuer la mise à jour de la date et l'heure d
 >
 
 
-## Logs
+## PRINCIPE DE FONCTIONNEMENT
+L'évaluation des opérations à exécuter s'effectue toutes les 5 minutes via le cron5.
+
+Lors de chaque cycle, la température ambiante est lue de la sonde référencée.  
+On vérifie que le poêle n'est pas dans un état d'erreur. Si oui, on le notifie.  
+Le mode jour/nuit est évalué.    
+
+> **Tip**
+>
+>Pour l'explication, j'utilise les valeurs par défaut du plugin. (T consigne: 21°C, Hystérèse: 1°C, Arrêt seuil:0°C, Puissance 1: -1°C, Puissance 2: -2°C, Puissance 3: -3°C, Puissance 4: -5°C).  
+>
+
+Si la température ambiante est supérieure au seuil de l'arrêt: 21,5°C (21 - 0 + hystérèse/2), les consignes de l'arrêt sont exécutées.  
+Si la température ambiante est supérieure au seuil de la Puissance 1: 20,5°C (21 - 1 + hystérèse/2), les consignes de la puissance 1 sont exécutées.  
+Si la température ambiante est supérieure au seuil de la Puissance 2: 19,5°C (21 - 2 + hystérèse/2), les consignes de la puissance 2 sont exécutées.  
+Si la température ambiante est supérieure au seuil de la Puissance 3: 18,5°C (21 - 3 + hystérèse/2), les consignes de la puissance 3 sont exécutées.  
+Si la température ambiante est superieure au seuil de la Puissance 4: 16,5°C (21 - 5 + hystérèse/2), les consignes de la puissance 4 sont exécutées.  
+Enfin, si la température ambiante est inférieure au seuil de la puissance 4, les consignes de la puissance 4 sont exécutées.  
+
+Une fois l'arrêt du poêle, la tedance d'évolution de la température ambiante est à la baisse.
+La logique est alors légèrement différente.
+Si la température ambiante est inférieure au seuil de la Puissance 4: 15,5°C (21 - 5 - hystérèse/2), les consignes de la puissance 4 sont exécutées.  
+Si la température ambiante est inférieure au seuil de la Puissance 3: 17,5°C (21 - 3 - hystérèse/2), les consignes de la puissance 3 sont exécutées.  
+Si la température ambiante est inférieure au seuil de la Puissance 2: 18,5°C (21 - 2 - hystérèse/2), les consignes de la puissance 2 sont exécutées.  
+Si la température ambiante est inférieure au seuil de la Puissance 1: 19,5°C (21 - 1 - hystérèse/2), les consignes de la puissance 1 sont exécutées.
+Si la température ambiante est inférieure au seuil de l'arrêt: 20,5°C (21 - 0 - hystérèse/2), rien n'est à faire. Le poêle est déjà à l'arrêt.
+
+Une ligne avec toutes les valeurs calculées est disponible dans le log en mode debug. 
+
+
 
 

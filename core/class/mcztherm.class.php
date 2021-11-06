@@ -300,7 +300,7 @@ class mcztherm extends eqLogic {
 
 		if (substr_compare($etat, 'Erreur', 0, strlen('Erreur'), true) == 0) {
 			// Envoi d'un message de notification
-			if ($mcztherm->getConfiguration('InfoEtatPoele') != '') {
+			if ($mcztherm->getConfiguration('CmdMessage') != '') {
 				$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
 				$options = array('title'=>'MCZ Maestro', 'message'=> $etat);
 				$cmd->execCmd($options, $cache = 0);
@@ -308,6 +308,22 @@ class mcztherm extends eqLogic {
 				$returnval = 1;
 			}
 		}
+
+		$nivPellets = mcztherm::getCmdInfoValue($mcztherm, 'InfoNiveauPellets');
+		$nivPelletsNOK = mcztherm::getCmdInfoValue($mcztherm, 'NiveauPelletsNOK');
+		if (($nivPellets != '') && ($nivPelletsNOK != '')) {
+			if (substr_compare($nivPellets, $nivPelletsNOK, 0, strlen($nivPelletsNOK), true) == 0) {
+				// Envoi d'un message de notification
+				if ($mcztherm->getConfiguration('CmdMessage') != '') {
+					$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
+					$options = array('title'=>'MCZ Maestro', 'message'=> $etat);
+					$cmd->execCmd($options, $cache = 0);
+					log::add('mcztherm', 'info', 'Notification: '. $etat);
+					$returnval = 1;
+				}
+			}
+		}
+
 		return($returnval);
 	}
 
@@ -423,11 +439,6 @@ class mcztherm extends eqLogic {
 				$mcztherm->setCache('currentMode', $currentMode);											
 			}										
 
-			// Trace
-			//$lastAction = $mcztherm->getCache('lastAction', '');
-			//$currentMode = $mcztherm->getCache('currentMode', '');											
-			//log::add('mcztherm','debug','  *** Infos(trace): lastAction: ' . $lastAction . ' currentMode: ' . $currentMode );
-
 			// Récupère l'info de consigne de température
 			$cmdhb = $mcztherm->getCmd(null,'T_consigne_info');
 			$consigneTemperature = cmd::byString('#'. $cmdhb->getHumanName() .'#')->execCmd();
@@ -442,19 +453,6 @@ class mcztherm extends eqLogic {
 			}
 			log::add('mcztherm','debug','  -  Tendance ' . $tendance);
 			$hysterese = ($mcztherm->getConfiguration('Hysterese') / 2) * $tendance;
-
-/*
-			$dateend = date('Y-m-d H:i:s' );
-			$datestart = date('Y-m-d H:i:s', strtotime('-15 minutes'));
-			$cmd = cmd::byID(str_replace('#','',$mcztherm->getConfiguration('SondeInt'))); 
-			$oldtendance = history::getTendance($cmd->getId(), $datestart, $dateend);
-			log::add('mcztherm', 'debug','  -  Old Tendance: ' . $oldtendance);
-
-			$hysterese = $mcztherm->getConfiguration('Hysterese') / 2;
-			if ($tendance <= 0) { // On est à la baisse de température
-				$hysterese = 0 - $hysterese;
-			}
-*/
 
 			// récupère et calcule les différentes températures de seuil
 			$TempP0 = $consigneTemperature + $mcztherm->getConfiguration('DeltaTempArret') + $hysterese;
@@ -543,7 +541,6 @@ class mcztherm extends eqLogic {
 					///// moved to processConsigneCommands:    $mcztherm->setCache('lastOff', date('Y-m-d H:i:00'));  // Sauve date/heure de l'arrêt
 				}
 			}
-			//mcztherm::processMajDateHeure($mcztherm);
 
 		}  // endof if ($cmdValue == 1)
 	}  //endof nextexec	
@@ -555,21 +552,9 @@ class mcztherm extends eqLogic {
 		foreach (self::byType('mcztherm') as $mcztherm) {  // Parcours tous les équipements du plugin
 			mcztherm::nextexec($mcztherm->getId());
 		}
-
 	}
 
 
-	/* Fonction exécutée automatiquement toutes les heures par Jeedom
-	public static function cronHourly() {
-
-	}
-	*/
-
-	/* Fonction exécutée automatiquement tous les jours par Jeedom
-	public static function cronDaily() {
-
-	}
-	*/
 	/* *********************Méthodes d'instance************************* */
 
 	public function preInsert() {
@@ -637,6 +622,10 @@ class mcztherm extends eqLogic {
 
 		if ($this->getConfiguration('HeureMaj') === '') {
 			$this->setConfiguration('HeureMaj', '03:05');
+		}
+
+		if ($this->getConfiguration('NiveauPelletsNOK') === '') {
+			$this->setConfiguration('NiveauPelletsNOK', 'Niveau presque vide');
 		}
 
 
