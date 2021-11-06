@@ -304,26 +304,26 @@ class mcztherm extends eqLogic {
 				$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
 				$options = array('title'=>'MCZ Maestro', 'message'=> $etat);
 				$cmd->execCmd($options, $cache = 0);
-				log::add('mcztherm', 'info', 'Notification: '. $etat);
+				log::add('mcztherm', 'warning', '-  Notification: '. $etat);
 				$returnval = 1;
 			}
 		}
 
-		$nivPellets = mcztherm::getCmdInfoValue($mcztherm, 'InfoNiveauPellets');
-		$nivPelletsNOK = mcztherm::getCmdInfoValue($mcztherm, 'NiveauPelletsNOK');
-		if (($nivPellets != '') && ($nivPelletsNOK != '')) {
+		if (($mcztherm->getConfiguration('InfoNiveauPellets') != '') || ($mcztherm->getConfiguration('NiveauPelletsNOK') != '')) {
+			$nivPellets = mcztherm::getCmdInfoValue($mcztherm, 'InfoNiveauPellets');
+			$nivPelletsNOK = $mcztherm->getConfiguration('NiveauPelletsNOK');
+			//log::add('mcztherm', 'debug', 'nivPellets:' . $nivPellets . '  nivPelletsNOK:' . $nivPelletsNOK); 
 			if (substr_compare($nivPellets, $nivPelletsNOK, 0, strlen($nivPelletsNOK), true) == 0) {
 				// Envoi d'un message de notification
 				if ($mcztherm->getConfiguration('CmdMessage') != '') {
 					$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
-					$options = array('title'=>'MCZ Maestro', 'message'=> $etat);
+					$options = array('title'=>'MCZ Maestro', 'message'=> 'Pellets ' . $nivPellets);
 					$cmd->execCmd($options, $cache = 0);
-					log::add('mcztherm', 'info', 'Notification: '. $etat);
+					log::add('mcztherm', 'warning', '-  Notification: Pellets '. $nivPellets);
 					$returnval = 1;
 				}
 			}
 		}
-
 		return($returnval);
 	}
 
