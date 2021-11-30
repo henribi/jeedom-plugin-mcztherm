@@ -43,9 +43,9 @@ class mcztherm extends eqLogic {
 						if (isset($cmdmcz) && $cmdmcz != '') {
 							cmd::byId(str_replace('#','',$cmdmcz))->execCmd();
 						}
-						log::add('mcztherm','debug','  -  Heure poele mise à jour');
+						log::add('mcztherm','debug','- Heure poele mise à jour');
 					} else {
-						log::add('mcztherm','info', '   -  ordrepoele n\'est pas un objet');
+						log::add('mcztherm','warning', '  ordrepoele n\'est pas un objet');
 					}
 				} 	
 			}
@@ -57,7 +57,7 @@ class mcztherm extends eqLogic {
 		// Récupère la Temp Consigne du poele
 		$tempConsignePoele = mcztherm::getCmdInfoValue($mcztherm, "InfoTConsignePoele");
 		if ($tempConsignePoele == $temperature) { 
-			log::add('mcztherm','debug','  -  Temperature ' . $temperature . ' déjà demandée');
+			log::add('mcztherm','debug','- Temperature ' . $temperature . ' déjà demandée');
 			return; 
 		}
 		//$mcztherm = eqLogic::byId($equipement);
@@ -72,22 +72,26 @@ class mcztherm extends eqLogic {
 
 				// To write log info
 				$name = cmd::byId(str_replace('#','',$cmdmcz))->getHumanName();
-				log::add('mcztherm','info','   -  Execute cmd - '. $name .' Set Temperature to '.$temperature);
+				log::add('mcztherm','info',' - Execute cmd - '. $name .' Set Temperature to '.$temperature);
 			} else {
-				log::add('mcztherm','info', '   -  Cmd "'. $cmdmcz . '" n\'est pas valable ou pas definie');	
+				log::add('mcztherm','warning', ' Cmd "'. $cmdmcz . '" n\'est pas valable ou pas definie');	
 			}
 		} else {
-			log::add('mcztherm','info', 'Equipement n\'est pas un objet');
+			log::add('mcztherm','warning', '  Equipement n\'est pas un objet');
 		}
 	}
 
 	private static function processConsigneCommands($mcztherm, $consigne) {
 		// Teste si la même consigne. Si,ou ne fait rien et quitte.
 		if ($mcztherm->getCache('currentConsigne', '') == $consigne) { 
-			log::add('mcztherm','debug','  -  Consigne ' . $consigne . ' déjà activée');
+			log::add('mcztherm','debug','- Consigne ' . $consigne . ' déjà activée');
 			return; 
 		}
-		log::add('mcztherm','Info','   -  Passage en consigne ' . $consigne);
+		if ($consigne =='P0') {
+			log::add('mcztherm','info',' - Passage en consigne: Arret (' . $consigne . ')');
+		} else {
+			log::add('mcztherm','info',' - Passage en consigne: ' . $consigne);
+		}
 		$mcztherm->setCache('currentConsigne', $consigne);
 		if ($consigne == 'P0') {
 			$mcztherm->setCache('lastOff', date('Y-m-d H:i:00'));  // Sauve date/heure de l'arrêt
@@ -96,7 +100,7 @@ class mcztherm extends eqLogic {
 		foreach ($mcztherm->getConfiguration($consigne) as $action) {
 			try {
 				$cmd = cmd::byId(str_replace('#', '', $action['cmd']));
-				log::add('mcztherm','info','   -  Action:  ' . cmd::byId(str_replace('#','',$action['cmd']))->getHumanName());
+				log::add('mcztherm','info',' - Action:  ' . cmd::byId(str_replace('#','',$action['cmd']))->getHumanName());
 				if (is_object($cmd) && $mcztherm->getId() == $cmd->getEqLogic_id()) {
 					continue;
 				}
@@ -124,7 +128,7 @@ class mcztherm extends eqLogic {
 				$cmdOn = $mcztherm->getConfiguration('CmdOnPoele');
 				try {
 					$cmd = cmd::byId(str_replace('#', '', $cmdOn));
-					log::add('mcztherm','info','   -  Action:  ' . cmd::byId(str_replace('#', '', $cmdOn))->getHumanName() );
+					log::add('mcztherm','info','  - Action:  ' . cmd::byId(str_replace('#', '', $cmdOn))->getHumanName() );
 					if (is_object($cmd) && $mcztherm->getId() != $cmd->getEqLogic_id()) {
 						$options = array();
 						if (isset($action['options'])) {
@@ -158,15 +162,15 @@ class mcztherm extends eqLogic {
 		// Examine si mode d'exclusion de l'état de la commande info 
 		$returnval = 0;
 		$checkbox = $mcztherm->getConfiguration('CheckEtat');
-		//log::add('mcztherm','debug','  - checkbox Etat: '. $checkbox );
+		//log::add('mcztherm','debug','- checkbox Etat: '. $checkbox );
 		if ($checkbox == 1) {
 			if ($mcztherm->getConfiguration('InfoEtatPoele') != '') {
 				$cmdEtat = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('InfoEtatPoele')))->execCmd();
 				if ($cmdEtat == $mcztherm->getConfiguration('ExclEtat')) {
-					log::add('mcztherm','debug','  - Exclusion sur état --> ' . $cmdEtat . ' ==> Stop.  Nothing to do.');
+					log::add('mcztherm','debug','- Exclusion sur état --> ' . $cmdEtat . ' ==> Stop.  Nothing to do.');
 					$returnval = 1;
 				} else {
-					log::add('mcztherm','debug','  - Pas d\'exclusion sur état --> ' . $cmdEtat . ' ==> Continue ....');
+					log::add('mcztherm','debug','- Pas d\'exclusion sur état --> ' . $cmdEtat . ' ==> Continue ....');
 				}
 			}
 		}
@@ -187,7 +191,7 @@ class mcztherm extends eqLogic {
 		}
 		if ($mcztherm->getConfiguration('CheckModeNuit') == 1) {
 			$heure = $mcztherm->getConfiguration('HeureModeNuitStart');
-			//log::add('mcztherm','debug','  - heureModeNuitStart: '.$heure);
+			//log::add('mcztherm','debug','- heureModeNuitStart: '.$heure);
 			$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
 			$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
 			$ts_nuit = strtotime(date('Y-m-d') . ' ' . $heure);
@@ -251,7 +255,7 @@ class mcztherm extends eqLogic {
 		if (is_object($cmd)) { //Si la commande existe
 			$cmdValue = $cmd->execCmd();
 			if ($cmdValue == 1) { // activation est On
-				//log::add('mcztherm', 'debug', '  - Activation est sur ON');
+				//log::add('mcztherm', 'debug', '- Activation est sur ON');
 				$heure = $mcztherm->getCmd(null,'horaire')->execCmd();
 				// skip si heure est à 0000
 				if ($heure == '0000')  {
@@ -260,7 +264,7 @@ class mcztherm extends eqLogic {
 					$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
 					$heure_timestamp = strtotime(date('d-m-Y') . ' ' . $heure);
 					if ($heure_timestamp == strtotime(date('H:i'))) {
-						log::add('mcztherm', 'debug', '  - testActivationThermostat:  heure correspond ==> activation');
+						log::add('mcztherm', 'info', ' - Activation du thermostat:  heure correspond ==> activation');
 						$returnval = 1;
 						$cmd = $mcztherm->getCmd(null,'on');  // execute la commande ON
 						$cmd->execCmd();
@@ -283,7 +287,7 @@ class mcztherm extends eqLogic {
 			$etat = mcztherm::getCmdInfoValue($mcztherm, 'InfoEtatPoele');
 			foreach ($arliste as $mot) {
 				if (substr_compare($etat, $mot, 0, strlen($mot), true) == 0) {
-					//log::add('mcztherm','debug','  -  Wait. Mot '. $mot .' found during testWaitEtat');
+					log::add('mcztherm', 'info',' - ' . $etat . ' ==> Attente boucle suivante');
 					$returnval = 1;
 					break;
 				}
@@ -304,7 +308,7 @@ class mcztherm extends eqLogic {
 				$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
 				$options = array('title'=>'MCZ Maestro', 'message'=> $etat);
 				$cmd->execCmd($options, $cache = 0);
-				log::add('mcztherm', 'warning', '-  Notification: '. $etat);
+				log::add('mcztherm', 'warning', '* '. $etat);
 				$returnval = 1;
 			}
 		}
@@ -319,7 +323,7 @@ class mcztherm extends eqLogic {
 					$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('CmdMessage')));
 					$options = array('title'=>'MCZ Maestro', 'message'=> 'Pellets ' . $nivPellets);
 					$cmd->execCmd($options, $cache = 0);
-					log::add('mcztherm', 'warning', '-  Notification: Pellets '. $nivPellets);
+					log::add('mcztherm', 'warning', '* Pellets '. $nivPellets);
 					$returnval = 1;
 				}
 			}
@@ -336,7 +340,7 @@ class mcztherm extends eqLogic {
 		$ts_curtime = strtotime(date('Y-m-d H:i:00'));
 		$ts_lastOff = strtotime($mcztherm->getCache('lastOff'));
 		if (($ts_lastOff + $delay) >= $ts_curtime) {
-			log::add('mcztherm','debug','   - testLastOffDelay: Delai pas dépassé  (LastOff:' . $mcztherm->getCache('lastOff') . ')');
+			log::add('mcztherm','debug','- testLastOffDelay: Delai pas dépassé  (LastOff:' . $mcztherm->getCache('lastOff') . ')');
 			$returnval = 1;
 		}
 		return($returnval);
@@ -346,7 +350,7 @@ class mcztherm extends eqLogic {
 
 	public static function nextexec($equipement) {
 		$mcztherm = eqLogic::byId($equipement);
-		//log::add('mcztherm','debug','- Appel de la fonction nextexec par ' . $mcztherm->getHumanName() . ' :');
+		log::add('mcztherm','debug','Execution de la fonction nextexec');
 		if ($mcztherm->getIsEnable() != 1) { // Si l'équipement est-il inactif ==> quit
 			return;
 		}
@@ -377,14 +381,14 @@ class mcztherm extends eqLogic {
 		if ($cmdValue == 1) { // mcztherm sur On
 			$lastAction = $mcztherm->getCache('lastAction', '');
 			$currentMode = $mcztherm->getCache('currentMode', '');											
-			log::add('mcztherm','debug','**** Infos(begin): lastAction: ' . $lastAction . ' currentMode: ' . $currentMode);
+			//log::add('mcztherm','debug','** Infos(begin): lastAction: ' . $lastAction . ' currentMode: ' . $currentMode);
 
 			// Teste si etat reporte une erreur ==> Notification
 			mcztherm::testEtatError($mcztherm);
 
 			// Examine si mode d'exclusion de l'état de la commande info 
 			if ($mcztherm::testExclusionEtat($mcztherm) == 1) {
-				log::add('mcztherm','debug','   - Exclusion sur état du poele est active');
+				log::add('mcztherm','debug','- Exclusion sur état du poele est active');
 				return;
 			}
 
@@ -392,22 +396,13 @@ class mcztherm extends eqLogic {
 			// recupere les variables de fonctionnement en cache heure, mode
 			$lastAction = $mcztherm->getCache('lastAction', '');
 			$currentMode = $mcztherm->getCache('currentMode', '');											
-			//log::add('mcztherm','info','   -  Infos: lastAction: ' . $lastAction . ' currentMode: ' . $currentMode );
+			//log::add('mcztherm','info',' - Infos: lastAction: ' . $lastAction . ' currentMode: ' . $currentMode );
 
-
-			/*
-			// Si même minute ==> ne rien faire
-			$ts_curtime = strtotime(date('Y-m-d H:i:00'));
-			if ($ts_curtime == $mcztherm->getCache('lastAction')) {	
-				log::add('mcztherm','debug','   - via meme minute exit ');
-				return;	
-			}
-			*/
 
 			if ($lastAction == '1970-01-01 00:00:00') {
 				// Determine quel mode choisir en fonction de l'heure et récupère la consigne et la température.
 				$curmode = $mcztherm::testModeJourNuit($mcztherm);
-				log::add('mcztherm','debug','   - testModeJourNuit: '. $curmode);
+				log::add('mcztherm','debug','- testModeJourNuit: '. $curmode);
 				if ($curmode == 1) { return; }     // conditions d'heure invalide
 				$currentMode = $curmode;  // curmode value is correct. May become $currentMode value
 				$curTemperature = $mcztherm->getConfiguration('TempMode' . $curmode);
@@ -445,13 +440,12 @@ class mcztherm extends eqLogic {
 
 			// Détermination de la tendance de chauffe pour le calcul de l'hystéresis
 			$curconsigne = $mcztherm->getCache('currentConsigne', '');
-			log::add('mcztherm','debug','  -  Current Consigne ' . $curconsigne);
 			if ($curconsigne == 'P0') {
 				$tendance = -1;
 			} else {
 				$tendance = 1;
 			}
-			log::add('mcztherm','debug','  -  Tendance ' . $tendance);
+			log::add('mcztherm','debug','- Current Consigne ' . $curconsigne . '  Tendance ' . $tendance);
 			$hysterese = ($mcztherm->getConfiguration('Hysterese') / 2) * $tendance;
 
 			// récupère et calcule les différentes températures de seuil
@@ -462,80 +456,82 @@ class mcztherm extends eqLogic {
 			$TempP4 = $consigneTemperature + $mcztherm->getConfiguration('DeltaTempP4') + $hysterese;
 
 			if (mcztherm::testWaitEtat($mcztherm) == 1) {
-				log::add('mcztherm', 'debug','  -  Un des états trouvé ==> Attente boucle suivante');
+				//log::add('mcztherm', 'debug','- Un des états trouvé ==> Attente boucle suivante');
 				return;
 			}
 
 			$TempAmbiante = mcztherm::getCmdInfoValue($mcztherm, 'SondeInt');
 
 			if ($tendance > 0) {
-				log::add('mcztherm', 'debug', '  -  T ambiante:' . $TempAmbiante . ' Consigne:' . $consigneTemperature .' Tendance:+   Seuils: Arret:' . $TempP0 . '  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4);
+				log::add('mcztherm', 'info', '-- T ambiante:' . $TempAmbiante . ' Demandée:' . $consigneTemperature .' Current Consigne ' . $curconsigne . '  Tendance:+ ');
+				log::add('mcztherm', 'info', ' - Seuils: Arret:' . $TempP0 . '  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4);
 				if($TempAmbiante >= $TempP0) {
 					// arrêt du poele
-					//log::add('mcztherm','info','   -  passage en consigne arret');
+					//log::add('mcztherm','info',' -  passage en consigne arret');
 					mcztherm::processConsigneCommands($mcztherm, 'P0');
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					// moved to processConsigneCommands:    $mcztherm->setCache('lastOff', date('Y-m-d H:i:00'));  // Sauve date/heure de l'arrêt
 				} else if ($TempAmbiante >= $TempP1) {
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P1');
+					//log::add('mcztherm','info',' -  passage en consigne P1');
 					mcztherm::processConsigneCommands($mcztherm, 'P1');  // activer les consignes P1
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allume le poele 
 				} else if ($TempAmbiante >= $TempP2){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P2');
+					//log::add('mcztherm','info',' -  passage en consigne P2');
 					mcztherm::processConsigneCommands($mcztherm, 'P2');  // activer les consignes P2
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allume le poele 
 				} else if ($TempAmbiante >= $TempP3){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P3');
+					//log::add('mcztherm','info',' -  passage en consigne P3');
 					mcztherm::processConsigneCommands($mcztherm, 'P3');  // activer les consignes P3
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
 				} else if ($TempAmbiante >= $TempP4){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P4');
+					//log::add('mcztherm','info',' -  passage en consigne P4');
 					mcztherm::processConsigneCommands($mcztherm, 'P4');  // activer les consignes P4
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
 				} else if ($TempAmbiante < $TempP4){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P4max');
+					//log::add('mcztherm','info',' -  passage en consigne P4max');
 					mcztherm::processConsigneCommands($mcztherm, 'P4');  // activer les consignes P4
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
 				}
 			} else if ($tendance < 0) {
-				log::add('mcztherm', 'debug', '  -  T ambiante:' . $TempAmbiante . ' Consigne:' . $consigneTemperature .' Tendance:-   Seuils: Arret:---  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4);
+				log::add('mcztherm', 'info', '-- T ambiante:' . $TempAmbiante . ' Demandée:' . $consigneTemperature . ' Current Consigne ' . $curconsigne . '  Tendance:- ');
+				log::add('mcztherm', 'info', ' - Seuils: Arret:---  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4);
 				if ($TempAmbiante < $TempP4){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P4');
+					//log::add('mcztherm','info',' -  passage en consigne P4');
 					mcztherm::processConsigneCommands($mcztherm, 'P4');  // activer les consignes P4
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
 				} else if ($TempAmbiante < $TempP3){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P3');
+					//log::add('mcztherm','info',' -  passage en consigne P3');
 					mcztherm::processConsigneCommands($mcztherm, 'P3');  // activer les consignes P3
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
 				} else if ($TempAmbiante < $TempP2){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P2');
+					//log::add('mcztherm','info',' -  passage en consigne P2');
 					mcztherm::processConsigneCommands($mcztherm, 'P2');  // activer les consignes P2
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allume le poele 
 				} else if ($TempAmbiante < $TempP1) {
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info','   -  passage en consigne P1');
+					//log::add('mcztherm','info',' -  passage en consigne P1');
 					mcztherm::processConsigneCommands($mcztherm, 'P1');  // activer les consignes P1
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allume le poele 
 				} else if($TempAmbiante < $TempP0) {
 					// arrêt du poele
-					log::add('mcztherm','info','   -  Le poele est déjà arrêté.');
+					log::add('mcztherm','debug','-  Le poele est déjà arrêté.');
 					//mcztherm::processConsigneCommands($mcztherm, 'P0');
 					//mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					///// moved to processConsigneCommands:    $mcztherm->setCache('lastOff', date('Y-m-d H:i:00'));  // Sauve date/heure de l'arrêt
