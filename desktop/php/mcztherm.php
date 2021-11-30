@@ -218,7 +218,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 					<fieldset>
 						<legend><i class="fa" aria-hidden="true"></i> {{Consignes}}</legend>
 						<div class="form-group">
-							<label class="col-sm-2 control-label">{{Arrêt}}</label>
+							<label class="col-sm-2 control-label">{{Arrêt (Puissance 0)}}</label>
 							<label class="col-sm-1 control-label">{{Seuil(°C)}}</label>
 							<div class="col-sm-1">
 								<div class="input-group">
