@@ -102,18 +102,19 @@ La dernière commande permet d'effectuer la mise à jour de la date et l'heure d
 La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info "ordrepoele" de l'équipement mcztherm.  
 Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur la commande "ordrepoele" de l'équipement mcztherm.
 
-> **Attention**
->
-> Cette commande nécessite une version modifiée du script python maestro.py.  Le script doit traiter la commande 9001 pour envoyer la commande C|SalvaDataOra|DDMMYYYYHHmm
->
-> Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
->
->La documentation du script et son code sont disponibles aux url ci-après.
->
->Doc: <https://henribi.github.io/Maestro_Remote/>
->
->Script: <https://github.com/henribi/Maestro_Remote>
->
+**Attention**
+
+Cette commande nécessite une version modifiée du script python maestro.py.
+Le script doit traiter la commande 9001 pour envoyer la ommande C|SalvaDataOra|DDMMYYYYHHmm
+
+Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
+
+La documentation du script et son code sont disponibles aux url ci-après.
+
+Doc: <https://henribi.github.io/Maestro_Remote/>
+
+Script: <https://github.com/henribi/Maestro_Remote>
+
 
 ## PRINCIPE DE FONCTIONNEMENT
 L'évaluation des opérations à exécuter s'effectue toutes les 5 minutes via le cron5.
