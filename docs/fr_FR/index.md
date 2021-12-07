@@ -132,11 +132,8 @@ Pour l'installation proprement dite, allez dans "Gestion des plugins", sélectio
 Il vous faut maintenant fournir les informations 
 
 ID Logique du plugin| mcztherm
-
 Utilisateur ou organisation du dépôt| henribi
-
 Nom du dépôt| jeedom-plugin-mcztherm
-
 Branche| master
 
 Sauvegarder et quittez la gestion des plugins.  Par exemple, allez sur le dashboard.  Revenez ensuite dans "Gestion des plugins". Le plugin MCZtherm est maintenant visible.
