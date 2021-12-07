@@ -105,11 +105,13 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 > **Attention**
 >
 > Cette commande nécessite une version modifiée du script python maestro.py.  Le script doit traiter la commande 9001 pour envoyer la commande C|SalvaDataOra|DDMMYYYYHHmm
-> Doc: https://henribi.github.io/Maestro_Remote/
-> Script: https://github.com/henribi/Maestro_Remote
 >
 > Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
 >
+La documentation du script et son code sont disponibles aux url ci-après.
+
+Doc: https://henribi.github.io/Maestro_Remote/
+Script: https://github.com/henribi/Maestro_Remote
 
 
 ## PRINCIPE DE FONCTIONNEMENT
