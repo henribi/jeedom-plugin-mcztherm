@@ -1,12 +1,12 @@
 # Plugin mcztherm
 
-Ce plugin permet de créer et gérer des thermostats simples pour piloter le chauffage d'un poêle à pellets de la gamme MCZ Maestro.
+Ce plugin permet de créer et gérer un thermostat simple pour piloter le chauffage d'un poêle à pellets de la gamme MCZ Maestro.
 
 Ses principales fonctionnalités sont:
    -  module le niveau de chauffe en fonction de la différence entre la température de consigne et la température ambiante
    -  gére deux mode de chauffe: Jour et Nuit
    -  dispose d'un mode **hystérésis**
-   -  utilise le module python pour dialoguer avec un poêle MCZ Maestro via MQTT
+   -  utilise le module python maestro.py pour dialoguer avec un poêle MCZ Maestro via MQTT
    -  conçu pour permettre un démarrage différé dans une seconde résidence
    -  permet de synchroniser l'heure du poele avec celle de Jeedom
 
@@ -15,7 +15,7 @@ Le mode **hystérésis** permet de gérer l’allumage et l’extinction du chau
 
 # Configuration
 
-Ce plugin est destiné à la création de thermostats dans Jeedom.
+Ce plugin est destiné à la création d'un thermostat dans Jeedom.
 
 
 ## La configuration en quelques clics
@@ -116,6 +116,31 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 >
 >Script: <https://github.com/henribi/Maestro_Remote>
 >
+
+## INSTALLATION
+Ce plugin n'est actuellement pas disponible via le market de Jeedom
+
+Vous pouvez l'installer directement à partir de GitHub ou manuellement.
+
+### A partir de GitHub
+Vous devez activer les mises à jour à partir de GitHub.
+
+Via les menus Réglages, Sytème, Configuration et l'onglet "Mises à jour/Market", sélectionnez Github dans "Configuration des dépôts" et activer Github.   Pour finir, sauvergardez et quittez.
+
+Pour l'installation proprement dite, allez dans "Gestion des plugins", sélectionnez "+ Plugins" et spécifiez Github comme type de source.
+
+Il vous faut maintenant fournir les informations 
+
+ID Logique du plugin| mcztherm
+
+Utilisateur ou organisation du dépôt| henribi
+
+Nom du dépôt| jeedom-plugin-mcztherm
+
+Branche| master
+
+Sauvegarder et quittez la gestion des plugins.  Par exemple, allez sur le dashboard.  Revenez ensuite dans "Gestion des plugins". Le plugin MCZtherm est maintenant visible.
+
 
 ## PRINCIPE DE FONCTIONNEMENT
 L'évaluation des opérations à exécuter s'effectue toutes les 5 minutes via le cron5.
