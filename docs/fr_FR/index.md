@@ -1,21 +1,22 @@
 # Plugin mcztherm
 
-Ce plugin permet de créer et gérer des thermostats simples pour piloter le chauffage d'un poêle à pellets de la gamme MCZ Maestro.
+Ce plugin permet de créer et gérer un thermostat simple pour piloter le chauffage d'un poêle à pellets de la gamme MCZ Maestro.
 
 Ses principales fonctionnalités sont:
    -  module le niveau de chauffe en fonction de la différence entre la température de consigne et la température ambiante
    -  gére deux mode de chauffe: Jour et Nuit
    -  dispose d'un mode **hystérésis**
-   -  utilise le module python pour dialoguer avec un poêle MCZ Maestro via MQTT
+   -  utilise le module python maestro.py pour dialoguer avec un poêle MCZ Maestro via MQTT
    -  conçu pour permettre un démarrage différé dans une seconde résidence
    -  permet de synchroniser l'heure du poele avec celle de Jeedom
 
+Comme ce plugin ne dialogue que via MQTT, il devrait également fonctionner avec le module maestro.py local sur un raspberry. Cette configuration n'a pas été testée. 
 
 Le mode **hystérésis** permet de gérer l’allumage et l’extinction du chauffage en fonction de la température intérieure, par rapport à un seuil correspondant à la consigne. L’hystérésis permet d’éviter des séquences arrêts, allumages trop fréquentes lorsque la température est autour la consigne.
 
 # Configuration
 
-Ce plugin est destiné à la création de thermostats dans Jeedom.
+Ce plugin est destiné à la création d'un thermostat dans Jeedom.
 
 
 ## La configuration en quelques clics
@@ -68,7 +69,7 @@ Par exemple, pour la consigne Puissance 1, j'ai défini chez moi que les actions
 >
 > Il faut définir au niveau de MQTT des commandes utnitaires.  C'est à dire une commande pour un fonction bien précise. 
 > 
-> Il faudra donc créer une commande par niveau de puissance, une commande par niveau du ventilateur ambaince, une commande par niveau du ventilateur canalisé, ...
+> Il faudra donc créer une commande par niveau de puissance, une commande par niveau du ventilateur ambiance, une commande par niveau du ventilateur canalisé, ...
 >
 
 La valeur d'hystérèse est divisée en deux.  Une demi est ajoutée à la température du seuil en phase de température montante.  En phase de température descendante, un demi est soustrait du seuil.
@@ -94,18 +95,70 @@ Ne pas remplir la commande s'il n'y a pas de sonde de pellets installée.
 
 Dans cet écran, vous allez spécifier les commandes à utiliser pour allumer ou éteindre le poêle.
 
-Il y également la commande pour indiquer la température de consigne au poêle. Pour fonctionner, cette commande nécessite une configuration particulière.  
-Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur 42,*commande*  
+Y figure également la commande pour indiquer la température de consigne au poêle. Pour fonctionner, cette commande nécessite une configuration particulière.  
+Il faut définir dans MQTT une commande type *action* et subtype *defaut* avec comme topic *SUBmcz*  et comme valeur 42,*commande*  
 Vous insérez *commande* avec recherche équipement.  C'est la commande T_demandee de l'équipement mcztherm
 
-La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure d'exécution.  
-La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info "ordrepoele" de l'équipement mcztherm.  
-Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur la commande "ordrepoele" de l'équipement mcztherm.
+La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure de cette mise à jour.  
+La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info *ordrepoele* de l'équipement mcztherm.  
+Il faut définir dans MQTT une commande type *action* et subtype *defaut* avec comme topic *SUBmcz* et comme valeur la commande *ordrepoele* de l'équipement mcztherm.
 
-> **Attention**
 >
-> Cette commande nécessite une version modifiée du script python maestro.py.  Le script doit traiter la commande 9001 pour envoyer la commande C|SalvaDataOra|DDMMYYYYHHmm
+>**Attention**
 >
+>Cette commande nécessite une version modifiée du script python maestro.py.
+>Le script doit traiter la commande 9001 pour envoyer la commande C\|SalvaDataOra\|DDMMYYYYHHmm
+>
+>Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
+>
+>La documentation du script et son code sont disponibles aux url ci-après.
+>
+>Doc: <https://henribi.github.io/Maestro_Remote/>
+>
+>Script: <https://github.com/henribi/Maestro_Remote>
+>
+
+## INSTALLATION
+Ce plugin n'est actuellement pas disponible via le market de Jeedom
+
+Vous pouvez l'installer directement à partir de GitHub ou manuellement.
+
+>**Attention**
+>
+>L'utilisation de plugin ne provenant pas du market de Jeedom peut vous faire perdre le support de Jeedom.
+>
+
+### A partir de GitHub
+Vous devez activer les mises à jour à partir de GitHub.
+
+Via les menus *Réglages, Sytème, Configuration* et l'onglet *Mises à jour/Market*, sélectionnez Github dans *Configuration des dépôts* et activer Github.   Pour finir, sauvergardez et quittez.
+
+Pour l'installation proprement dite, allez dans *Gestion des plugins*, sélectionnez *+ Plugins* et spécifiez Github comme type de source.
+
+Il vous faut maintenant fournir les informations 
+
+ID Logique du plugin| mcztherm
+Utilisateur ou organisation du dépôt| henribi
+Nom du dépôt| jeedom-plugin-mcztherm
+Branche| master
+
+Sauvegarder et quittez la gestion des plugins.  Par exemple, allez sur le dashboard.  Revenez ensuite dans *Gestion des plugins*. Le plugin MCZtherm est maintenant visible.
+
+### Manuellement
+Décharger le code de Github via un fichier zip.
+
+Explosez ce zip sur votre disque local.  Vous obtenez un directory *jeedom-plugin-mcztherm-master* contenant les fichiers du plugin.
+
+Renommez ce directory en *mcztherm*.
+
+A l'aide du plugin jeexplorer, téléchargez l'entièreté de ce directory dans le directory plugins de votre Jeedom.
+
+>**Tip**
+>
+>En Jeedom 4.2, Jeexplorer est intégré et se trouve en *Réglages, Système, Editeur de fichier*
+>
+
+Le plugin mcztherm est maintenant visible dans la *Gestion des plugins*.
 
 
 ## PRINCIPE DE FONCTIONNEMENT
