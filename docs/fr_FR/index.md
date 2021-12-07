@@ -110,8 +110,9 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 >
 La documentation du script et son code sont disponibles aux url ci-après.
 
-Doc: https://henribi.github.io/Maestro_Remote/
-Script: https://github.com/henribi/Maestro_Remote
+Doc: <https://henribi.github.io/Maestro_Remote/>
+
+Script: <https://github.com/henribi/Maestro_Remote>
 
 
 ## PRINCIPE DE FONCTIONNEMENT
