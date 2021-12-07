@@ -98,7 +98,7 @@ Il y également la commande pour indiquer la température de consigne au poêle.
 Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur 42,*commande*  
 Vous insérez *commande* avec recherche équipement.  C'est la commande T_demandee de l'équipement mcztherm
 
-La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure d'exécution.  
+La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure de cette mise à jour.  
 La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info "ordrepoele" de l'équipement mcztherm.  
 Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur la commande "ordrepoele" de l'équipement mcztherm.
 
@@ -107,6 +107,8 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 > Cette commande nécessite une version modifiée du script python maestro.py.  Le script doit traiter la commande 9001 pour envoyer la commande C|SalvaDataOra|DDMMYYYYHHmm
 > Doc: https://henribi.github.io/Maestro_Remote/
 > Script: https://github.com/henribi/Maestro_Remote
+>
+> Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
 >
 
 
