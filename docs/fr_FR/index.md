@@ -108,12 +108,12 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 >
 > Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
 >
-La documentation du script et son code sont disponibles aux url ci-après.
-
-Doc: <https://henribi.github.io/Maestro_Remote/>
-
-Script: <https://github.com/henribi/Maestro_Remote>
-
+>La documentation du script et son code sont disponibles aux url ci-après.
+>
+>Doc: <https://henribi.github.io/Maestro_Remote/>
+>
+>Script: <https://github.com/henribi/Maestro_Remote>
+>
 
 ## PRINCIPE DE FONCTIONNEMENT
 L'évaluation des opérations à exécuter s'effectue toutes les 5 minutes via le cron5.
