@@ -10,6 +10,7 @@ Ses principales fonctionnalités sont:
    -  conçu pour permettre un démarrage différé dans une seconde résidence
    -  permet de synchroniser l'heure du poele avec celle de Jeedom
 
+Comme ce plugin ne dialogue que via MQTT, il devrait également fonctionner avec le module maestro.py local sur un raspberry. Cette configuration n'a pas été testée. 
 
 Le mode **hystérésis** permet de gérer l’allumage et l’extinction du chauffage en fonction de la température intérieure, par rapport à un seuil correspondant à la consigne. L’hystérésis permet d’éviter des séquences arrêts, allumages trop fréquentes lorsque la température est autour la consigne.
 
@@ -106,7 +107,7 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 >**Attention**
 >
 >Cette commande nécessite une version modifiée du script python maestro.py.
->Le script doit traiter la commande 9001 pour envoyer la ommande C\|SalvaDataOra\|DDMMYYYYHHmm
+>Le script doit traiter la commande 9001 pour envoyer la commande C\|SalvaDataOra\|DDMMYYYYHHmm
 >
 >Si vous n'avez pas ou n'utilisez pas ce script, laissez la commande vide.
 >
@@ -130,9 +131,9 @@ Vous pouvez l'installer directement à partir de GitHub ou manuellement.
 ### A partir de GitHub
 Vous devez activer les mises à jour à partir de GitHub.
 
-Via les menus Réglages, Sytème, Configuration et l'onglet "Mises à jour/Market", sélectionnez Github dans "Configuration des dépôts" et activer Github.   Pour finir, sauvergardez et quittez.
+Via les menus *Réglages, Sytème, Configuration* et l'onglet *Mises à jour/Market*, sélectionnez Github dans *Configuration des dépôts* et activer Github.   Pour finir, sauvergardez et quittez.
 
-Pour l'installation proprement dite, allez dans "Gestion des plugins", sélectionnez "+ Plugins" et spécifiez Github comme type de source.
+Pour l'installation proprement dite, allez dans *Gestion des plugins*, sélectionnez *+ Plugins* et spécifiez Github comme type de source.
 
 Il vous faut maintenant fournir les informations 
 
@@ -141,23 +142,23 @@ Utilisateur ou organisation du dépôt| henribi
 Nom du dépôt| jeedom-plugin-mcztherm
 Branche| master
 
-Sauvegarder et quittez la gestion des plugins.  Par exemple, allez sur le dashboard.  Revenez ensuite dans "Gestion des plugins". Le plugin MCZtherm est maintenant visible.
+Sauvegarder et quittez la gestion des plugins.  Par exemple, allez sur le dashboard.  Revenez ensuite dans *Gestion des plugins*. Le plugin MCZtherm est maintenant visible.
 
 ### Manuellement
 Décharger le code de Github via un fichier zip.
 
-Explosez ce zip sur votre disque local.  Vous obtenez un directory "jeedom-plugin-mcztherm-master" contenant les fichiers du plugin.
+Explosez ce zip sur votre disque local.  Vous obtenez un directory *jeedom-plugin-mcztherm-master* contenant les fichiers du plugin.
 
-Renommez ce directory en "mcztherm".
+Renommez ce directory en *mcztherm*.
 
 A l'aide du plugin jeexplorer, téléchargez l'entièreté de ce directory dans le directory plugins de votre Jeedom.
 
 >**Tip**
 >
->En Jeedom 4.2, Jeexplorer est intégré et se trouve en Réglages, Système, Editeur de fichier
+>En Jeedom 4.2, Jeexplorer est intégré et se trouve en *Réglages, Système, Editeur de fichier*
 >
 
-Le plugin mcztherm est maintenant visible dans la "Gestion des plugins".
+Le plugin mcztherm est maintenant visible dans la *Gestion des plugins*.
 
 
 ## PRINCIPE DE FONCTIONNEMENT
