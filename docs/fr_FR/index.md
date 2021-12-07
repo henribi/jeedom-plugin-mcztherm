@@ -69,7 +69,7 @@ Par exemple, pour la consigne Puissance 1, j'ai défini chez moi que les actions
 >
 > Il faut définir au niveau de MQTT des commandes utnitaires.  C'est à dire une commande pour un fonction bien précise. 
 > 
-> Il faudra donc créer une commande par niveau de puissance, une commande par niveau du ventilateur ambaince, une commande par niveau du ventilateur canalisé, ...
+> Il faudra donc créer une commande par niveau de puissance, une commande par niveau du ventilateur ambiance, une commande par niveau du ventilateur canalisé, ...
 >
 
 La valeur d'hystérèse est divisée en deux.  Une demi est ajoutée à la température du seuil en phase de température montante.  En phase de température descendante, un demi est soustrait du seuil.
@@ -95,13 +95,13 @@ Ne pas remplir la commande s'il n'y a pas de sonde de pellets installée.
 
 Dans cet écran, vous allez spécifier les commandes à utiliser pour allumer ou éteindre le poêle.
 
-Il y également la commande pour indiquer la température de consigne au poêle. Pour fonctionner, cette commande nécessite une configuration particulière.  
-Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur 42,*commande*  
+Y figure également la commande pour indiquer la température de consigne au poêle. Pour fonctionner, cette commande nécessite une configuration particulière.  
+Il faut définir dans MQTT une commande type *action* et subtype *defaut* avec comme topic *SUBmcz*  et comme valeur 42,*commande*  
 Vous insérez *commande* avec recherche équipement.  C'est la commande T_demandee de l'équipement mcztherm
 
 La dernière commande permet d'effectuer la mise à jour de la date et l'heure du poêle ainsi que l'heure de cette mise à jour.  
-La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info "ordrepoele" de l'équipement mcztherm.  
-Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme valeur la commande "ordrepoele" de l'équipement mcztherm.
+La logique est semblable à celle pour la température. L'information pour la synchronisation de l'heure est sauvée dans la commande info *ordrepoele* de l'équipement mcztherm.  
+Il faut définir dans MQTT une commande type *action* et subtype *defaut* avec comme topic *SUBmcz* et comme valeur la commande *ordrepoele* de l'équipement mcztherm.
 
 >
 >**Attention**
