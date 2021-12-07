@@ -122,6 +122,11 @@ Ce plugin n'est actuellement pas disponible via le market de Jeedom
 
 Vous pouvez l'installer directement à partir de GitHub ou manuellement.
 
+>**Attention**
+>
+>L'utilisation de plugin ne provenant pas du market de Jeedom peut vous faire perdre le support de Jeedom.
+>
+
 ### A partir de GitHub
 Vous devez activer les mises à jour à partir de GitHub.
 
@@ -137,6 +142,22 @@ Nom du dépôt| jeedom-plugin-mcztherm
 Branche| master
 
 Sauvegarder et quittez la gestion des plugins.  Par exemple, allez sur le dashboard.  Revenez ensuite dans "Gestion des plugins". Le plugin MCZtherm est maintenant visible.
+
+### Manuellement
+Décharger le code de Github via un fichier zip.
+
+Explosez ce zip sur votre disque local.  Vous obtenez un directory "jeedom-plugin-mcztherm-master" contenant les fichiers du plugin.
+
+Renommez ce directory en "mcztherm".
+
+A l'aide du plugin jeexplorer, téléchargez l'entièreté de ce directory dans le directory plugins de votre Jeedom.
+
+>**Tip**
+>
+>En Jeedom 4.2, Jeexplorer est intégré et se trouve en Réglages, Système, Editeur de fichier
+>
+
+Le plugin mcztherm est maintenant visible dans la "Gestion des plugins".
 
 
 ## PRINCIPE DE FONCTIONNEMENT
