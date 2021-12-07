@@ -656,6 +656,7 @@ class mcztherm extends eqLogic {
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('binary');
+		$info->setGeneric_type('HEATING_STATE');
 		$info->save();
 
 		$action = $this->getCmd(null, 'on');
@@ -675,6 +676,7 @@ class mcztherm extends eqLogic {
 		$action->setConfiguration('updateCmdToValue', 1);
 		$action->setType('action');
 		$action->setSubType('other');
+		$action->setGeneric_type('HEATING_ON');
 		$action->save();
 
 		$action = $this->getCmd(null, 'off');
@@ -695,6 +697,7 @@ class mcztherm extends eqLogic {
 		$action->setConfiguration('updateCmdToValue', 0);
 		$action->setType('action');
 		$action->setSubType('other');
+		$action->setGeneric_type('HEATING_OFF');
 		$action->save();
 
 		$info = $this->getCmd(null, 't_consigne_info');
@@ -712,6 +715,7 @@ class mcztherm extends eqLogic {
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('numeric');
+		$info->setGeneric_type('THERMOSTAT_SETPOINT');
 		$info->save();
 
 		$action = $this->getCmd(null, 't_consigne');
@@ -733,6 +737,7 @@ class mcztherm extends eqLogic {
 		$action->setType('action');
 		$action->setSubType('slider');
 		$action->setIsVisible(1);
+		$action->setGeneric_type('THERMOSTAT_SET_SETPOINT');
 		$action->save();
 
 		// insérer ici les commandes techniques
@@ -747,6 +752,7 @@ class mcztherm extends eqLogic {
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('binary');
+		$info->setGeneric_type('ENERGY_STATE');
 		$info->save();
 
 		$action = $this->getCmd(null, 'act_on');
@@ -767,6 +773,7 @@ class mcztherm extends eqLogic {
 		$action->setConfiguration('updateCmdToValue', 1);
 		$action->setType('action');
 		$action->setSubType('other');
+		$action->setGeneric_type('ENERGY_ON');
 		$action->save();
 
 		$action = $this->getCmd(null, 'act_off');
@@ -786,6 +793,7 @@ class mcztherm extends eqLogic {
 		$action->setConfiguration('updateCmdToValue', 0);
 		$action->setType('action');
 		$action->setSubType('other');
+		$action->setGeneric_type('ENERGY_OFF');
 		$action->save();
 
 		$info = $this->getCmd(null, 'horaire');
@@ -802,6 +810,7 @@ class mcztherm extends eqLogic {
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('numeric');
+		$info->setGeneric_type('GENERIC_INFO');
 		$info->save();
 
 		$action = $this->getCmd(null, 'var_horaire');
@@ -825,6 +834,7 @@ class mcztherm extends eqLogic {
 		$action->setValue($info->getId());
 		$action->setType('action');
 		$action->setSubType('slider');
+		$action->setGeneric_type('GENERIC_ACTION');
 		$action->save();
 
 
@@ -843,6 +853,7 @@ class mcztherm extends eqLogic {
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('numeric');
+		$info->setGeneric_type('GENERIC_INFO');
 		$info->save();
 
 		$action = $this->getCmd(null, 'var_t_demandee');
@@ -864,6 +875,7 @@ class mcztherm extends eqLogic {
 		$action->setType('action');
 		$action->setSubType('slider');
 		$action->setIsVisible(0);
+		$action->setGeneric_type('GENERIC_ACTION');
 		$action->save();
 
 		$info = $this->getCmd(null, 'ordrepoele');
@@ -878,6 +890,7 @@ class mcztherm extends eqLogic {
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('string');
+		$info->setGeneric_type('GENERIC_INFO');
 		$info->save();
 
 
