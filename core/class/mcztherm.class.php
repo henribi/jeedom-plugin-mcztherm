@@ -97,6 +97,18 @@ class mcztherm extends eqLogic {
 			$mcztherm->setCache('lastOff', date('Y-m-d H:i:00'));  // Sauve date/heure de l'arrêt
 		}
 
+		$currentconsigneval = intval(substr($consigne, -1 ));
+		if (is_object($mcztherm)) {
+			$cmdhb = $mcztherm->getCmd(null,'currentconsigne');
+			if (is_object($cmdhb)) {
+				$cmdhbname = $cmdhb->getHumanName();	
+				cmd::byString('#'.$cmdhbname.'#')->event($currentconsigneval);
+			} else {
+				log::add('mcztherm','debug','*** currentconsigne not an object');
+			}
+		}
+
+
 		foreach ($mcztherm->getConfiguration($consigne) as $action) {
 			try {
 				$cmd = cmd::byId(str_replace('#', '', $action['cmd']));
@@ -651,7 +663,6 @@ class mcztherm extends eqLogic {
 			$info->setName(__('Etat', __FILE__));
 			$info->setIsVisible(0);
 			$info->setisHistorized(1);
-			$info->setGeneric_type('HEATING_STATE');
 		}
 		$info->setOrder($order++);
 		$info->setEqLogic_id($this->getId());
@@ -668,7 +679,6 @@ class mcztherm extends eqLogic {
 			$action->setTemplate('mobile','mcztherm::mcztoggle');
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
-			$action->setGeneric_type('HEATING_ON');
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -689,7 +699,6 @@ class mcztherm extends eqLogic {
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
 			// $action->setDisplay('forceReturnLineAfter','1');
-			$action->setGeneric_type('HEATING_OFF');
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -710,7 +719,6 @@ class mcztherm extends eqLogic {
 			$info->setConfiguration('minValue', 5);
 			$info->setConfiguration('maxValue', 35);
 			$info->setUnite('');
-			$info->setGeneric_type('THERMOSTAT_SETPOINT');
 		}
 		$info->setOrder($order++);
 		$info->setEqLogic_id($this->getId());
@@ -729,7 +737,6 @@ class mcztherm extends eqLogic {
 			$action->setTemplate('mobile','button');
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
-			$action->setGeneric_type('THERMOSTAT_SET_SETPOINT');
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -747,7 +754,6 @@ class mcztherm extends eqLogic {
 			$info->setLogicalId('activation');
 			$info->setName(__('Activation', __FILE__));
 			$info->setIsVisible(0);
-			$info->setGeneric_type('ENERGY_STATE');
 		}
 		$info->setOrder($order++);
 		$info->setEqLogic_id($this->getId());
@@ -765,7 +771,6 @@ class mcztherm extends eqLogic {
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
 			$action->setDisplay('forceReturnLineBefore','1');
-			$action->setGeneric_type('ENERGY_ON');
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -785,7 +790,6 @@ class mcztherm extends eqLogic {
 			$action->setTemplate('mobile','mcztherm::mczact');
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
-			$action->setGeneric_type('ENERGY_OFF');
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -805,7 +809,6 @@ class mcztherm extends eqLogic {
 			$info->setisHistorized(1);
 			$info->setConfiguration('minValue', 0);
 			$info->setConfiguration('maxValue', 2359);
-			$info->setGeneric_type('GENERIC_INFO');
 		}
 		$info->setOrder($order++);
 		$info->setEqLogic_id($this->getId());
@@ -826,7 +829,7 @@ class mcztherm extends eqLogic {
 			$action->setDisplay('showNameOnmobile','0');
 			$arr['step'] = 5;
 			$action->setDisplay('parameters', $arr);
-			$action->setGeneric_type('GENERIC_ACTION');
+
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -847,7 +850,6 @@ class mcztherm extends eqLogic {
 			$info->setConfiguration('minValue', 0);
 			$info->setConfiguration('maxValue', 70);
 			$info->setUnite('');
-			$info->setGeneric_type('GENERIC_INFO');
 		}
 		$info->setOrder($order++);
 		$info->setEqLogic_id($this->getId());
@@ -866,7 +868,6 @@ class mcztherm extends eqLogic {
 			$action->setTemplate('mobile','button');
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
-			$action->setGeneric_type('GENERIC_ACTION');
 		}
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
@@ -884,13 +885,27 @@ class mcztherm extends eqLogic {
 			$info->setName(__('ordrepoele', __FILE__));
 			$info->setIsVisible(0);
 			$info->setisHistorized(0);
-			$info->setGeneric_type('GENERIC_INFO');
 		}
 		$info->setOrder($order++);
 		$info->setEqLogic_id($this->getId());
 		$info->setType('info');
 		$info->setSubType('string');
 		$info->save();
+
+		$info = $this->getCmd(null, 'currentconsigne');
+		if (!is_object($info)) {
+			$info = new mczthermCmd();
+			$info->setLogicalId('currentconsigne');
+			$info->setName(__('currentconsigne', __FILE__));
+			$info->setIsVisible(0);
+			$info->setisHistorized(0);
+		}
+		$info->setOrder($order++);
+		$info->setEqLogic_id($this->getId());
+		$info->setType('info');
+		$info->setSubType('string');
+		$info->save();
+
 
 
 	}
