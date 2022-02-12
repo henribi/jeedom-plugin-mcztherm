@@ -83,6 +83,8 @@ L'information Valeur état off est le texte donnant l'état du poêle à l'état
 
 La zone Attente sur un état spécifie les textes renvoyés par le poêle pour lesquels il faut attendre. Il est inutile d'envoyer des commandes au poêle durant ces phases.
 
+L'info Puissance active permet d'effectuer une reprise de l'état du poêle dans le plugin.
+
 La zone Consigne de température permet de connaître la consigne de température connue du poêle.
 
 Les deux dernières zones permmetent l'envoi d'une notification si le niveau de pellets est presque vide.  

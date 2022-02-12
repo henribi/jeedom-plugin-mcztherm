@@ -82,10 +82,16 @@ class mcztherm extends eqLogic {
 	}
 
 	private static function processConsigneCommands($mcztherm, $consigne) {
-		// Teste si la même consigne. Si,ou ne fait rien et quitte.
-		if ($mcztherm->getCache('currentConsigne', '') == $consigne) { 
-			log::add('mcztherm','debug','- Consigne ' . $consigne . ' déjà activée');
-			return; 
+		// Récupère le profil actif du poêle et le compare à la currentConsigne.
+		$puissanceActiveVal = intval(substr($mcztherm::getCmdInfoValue($mcztherm, 'InfoPuissancePoele'), -1));
+		$currentConsigneVal = intval(substr($mcztherm->getCache('currentConsigne', ''), -1));
+		log::add('mcztherm','debug',' - P active: ' . $puissanceActiveVal . '   cur Consigne: ' . $currentConsigneVal);
+		if ($puissanceActiveVal == $currentConsigneVal) {
+			// Teste si la même consigne. Si,ou ne fait rien et quitte.
+			if ($mcztherm->getCache('currentConsigne', '') == $consigne) { 
+				log::add('mcztherm','debug','- Consigne ' . $consigne . ' déjà activée');
+				return; 
+			}
 		}
 		if ($consigne =='P0') {
 			log::add('mcztherm','info',' - Passage en consigne: Arret (' . $consigne . ')');
@@ -166,6 +172,8 @@ class mcztherm extends eqLogic {
 		$value = $cmd->execCmd();
 		return ($value);
 	}
+
+
 
 	private static function testExclusionEtat($mcztherm) {
 		// mcztherm: eqlogic
@@ -430,7 +438,7 @@ class mcztherm extends eqLogic {
 			}
 		
 
-			// Teste si on est à un changement de mode
+			// Teste si on est à un changement de mode (jour/nuit)
 			$curmode = $mcztherm::testChangeModeJourNuit($mcztherm);
 			if ($curmode == 1) { return; }      // conditions d'heure invalide
 			if ($curmode != '') {  

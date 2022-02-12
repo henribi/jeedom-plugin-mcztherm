@@ -385,6 +385,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
+--->
 						<div class="form-group">
 							<label class="col-sm-3 control-label">{{Puissance active}}</label>
 							<div class="col-sm-4">
@@ -398,6 +399,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
+<!---
 						<div class="form-group">
 							<label class="col-sm-3 control-label">{{Niveau ventilateur ambiance}}</label>
 							<div class="col-sm-4">
@@ -438,7 +440,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="col-sm-3 control-label">{{Statut du mode ECO}}</label>
+							<label class="col-sm-3 control-label">{{Etat mode ECO}}</label>
 							<div class="col-sm-4">
 								<div class="input-group">
 									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="InfoEcoPoele" placeholder="{{Commande info indiquant l'état du mode ECO}}"/>
