@@ -167,7 +167,7 @@ class mcztherm extends eqLogic {
 	private static function getCmdInfoValue($mcztherm, $cfgname) {
 		// mcztherm: eqlogic
 		// cfgname:  nom de la varaiable de configuration
-		// valeur de la commande spécifiée par la variable de configuration
+		// retourne la valeur de la commande spécifiée par la variable de configuration
 		$cmd = cmd::byId(str_replace('#','',$mcztherm->getConfiguration($cfgname)));
 		$value = $cmd->execCmd();
 		return ($value);
@@ -198,71 +198,90 @@ class mcztherm extends eqLogic {
 	}
 
 
-	private static function testModeJourNuit($mcztherm) {
-		// check mode (jour/nuit) to apply
-		$ts_curtime = strtotime(date('Y-m-d H:i:00'));
-		if ($mcztherm->getConfiguration('CheckModeJour') == 1) {
-			$heure = $mcztherm->getConfiguration('HeureModeJourStart');
-			$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
-			$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
-			$ts_jour = strtotime(date('Y-m-d') . ' ' . $heure);
-		} else {
-			$ts_jour = strtotime(date('Y-m-d') . ' 23:59:00');
-		}
-		if ($mcztherm->getConfiguration('CheckModeNuit') == 1) {
-			$heure = $mcztherm->getConfiguration('HeureModeNuitStart');
-			//log::add('mcztherm','debug','- heureModeNuitStart: '.$heure);
-			$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
-			$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
-			$ts_nuit = strtotime(date('Y-m-d') . ' ' . $heure);
-		} else {
-			$ts_nuit = strtotime(date('Y-m-d') . ' 24:00:00');
-		}
-		if ($ts_jour < $ts_nuit) {
-			if ($ts_curtime < $ts_jour) {
-				$returnval = 'Nuit';
-			} else if (($ts_curtime >= $ts_jour) && ($ts_curtime < $ts_nuit)) {
-				$returnval = 'Jour';
-			} else {
-				$returnval = 'Nuit';
+	private static function testMode($mcztherm) {
+		// test mode to apply at start
+		// mcztherm:  eqLogic
+		// return:  mode array
+		$returnval = array();
+		$heures = array();
+		$curtime = date('Hi');
+		log::add('mcztherm','debug', 'curtime => ' . $curtime);
+		// retrieve all time and set in array
+		$modes = $mcztherm->getConfiguration('mode');
+		foreach($modes as $mode) {
+			if ($mode['active'] == 1) {
+				$heure = $mode['time'];
+				$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
+				$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
+				$heures[] = $heure;
 			}
-		} else {
-			log::add('mcztherm','error', 'Ces conditions d\'heures jour-nuit ne sont pas supportées ==> stop' );
-			$returnval = 1;
 		}
+		// add 2359 & 0000 to array
+		//$heures[] = "2359";
+		$heures[] = "0000";
+
+		// Sort array lowest to biggest
+		rsort($heures);
+		log::add('mcztherm','debug', 'heures (desc) => ' . json_encode($heures));
+
+		foreach($heures as $heure) {
+			if ($curtime >= $heure) {
+				$result = $heure;
+				break;
+			}
+		}
+		if ($result == '0000') {
+			$curtime = '2359';
+			foreach($heures as $heure) {
+				if ($curtime >= $heure) {
+					$result = $heure;
+					break;
+				}
+			}
+		}
+		log::add('mcztherm','debug', 'result => ' . $result);
+
+		// Retrieve mode corresponding to result
+		foreach($modes as $mode) {
+			if ($mode['active'] == 1) {
+				$heure = $mode['time'];
+				$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
+				$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
+				if ($heure == $result) {
+					$returnval = $mode;
+				}
+			}
+		}
+
+		log::add('mcztherm','debug', 'Actual mode => ' . json_encode($returnval));
 		return($returnval);
 	}
 
 
-	private static function testChangeModeJourNuit($mcztherm) {
-		$returnval = '';
-		// check mode (jour/nuit) to apply
-		$ts_curtime = strtotime(date('Y-m-d H:i:00'));
-		if ($mcztherm->getConfiguration('CheckModeJour') == 1) {
-			$heure = $mcztherm->getConfiguration('HeureModeJourStart');
-			$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
-			$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
-			$ts_jour = strtotime(date('Y-m-d') . ' ' . $heure);
-			if ($ts_curtime == $ts_jour) {
-				$returnval = 'Jour';
-			}
-		} 
-		if ($mcztherm->getConfiguration('CheckModeNuit') == 1) {
-			$heure = $mcztherm->getConfiguration('HeureModeNuitStart');
-			$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
-			$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
-			$ts_nuit = strtotime(date('Y-m-d') . ' ' . $heure);
-			if ($ts_curtime == $ts_nuit) {
-				$returnval = 'Nuit';
-			}
-			if ($ts_curtime == strtotime(date('Y-m-d 00:00:00'))) {   // à 0h00
-				$returnval = 'Nuit';
+	private static function testChangeMode($mcztherm) {
+		// Test if we have to change the mode
+		// mcztherm:   eqLogic
+		// return: mode array  or 1 if not a time to change mode
+		//$returnval = array();
+		$curtime = date('Hi');
+		$modes = $mcztherm->getConfiguration('mode');
+		foreach($modes as $mode) {
+			if ($mode['active'] == 1) {
+				$heure = $mode['time'];
+				$heure = str_replace(':','',$heure);   //enleve les : dans l'heure
+				$heure = substr('000'.$heure,-4);   //Traitement des 0 sur les heures < 10:00
+				if ($curtime == $heure) {
+					$returnval = $mode;
+					break;
+				}
 			}
 		}
-		if (($mcztherm->getConfiguration('CheckModeJour') == 0) && ($mcztherm->getConfiguration('CheckModeNuit') == 0)) {
-			log::add('mcztherm','error', 'Ces conditions d\'heures jour-nuit ne sont pas supportées ==> stop' );
+		if (!isset($returnval)) {
 			$returnval = 1;
+		} else {
+			log::add('mcztherm','debug', 'Change mode => ' . json_encode($returnval));
 		}
+
 		return($returnval);
 	}
 
@@ -371,6 +390,7 @@ class mcztherm extends eqLogic {
 	public static function nextexec($equipement) {
 		$mcztherm = eqLogic::byId($equipement);
 		log::add('mcztherm','debug','Execution de la fonction nextexec');
+		//log::add('mcztherm','debug', 'mode => ' . json_encode($mcztherm->getConfiguration('mode')));
 		if ($mcztherm->getIsEnable() != 1) { // Si l'équipement est-il inactif ==> quit
 			return;
 		}
@@ -421,11 +441,11 @@ class mcztherm extends eqLogic {
 
 			if ($lastAction == '1970-01-01 00:00:00') {
 				// Determine quel mode choisir en fonction de l'heure et récupère la consigne et la température.
-				$curmode = $mcztherm::testModeJourNuit($mcztherm);
-				log::add('mcztherm','debug','- testModeJourNuit: '. $curmode);
-				if ($curmode == 1) { return; }     // conditions d'heure invalide
-				$currentMode = $curmode;  // curmode value is correct. May become $currentMode value
-				$curTemperature = $mcztherm->getConfiguration('TempMode' . $curmode);
+				$mode = $mcztherm::testMode($mcztherm);
+				log::add('mcztherm','debug','- actualMode: '. $mode['nom']);
+				//if ($mode == 1) { return; }     // conditions d'heure invalide
+				$currentMode = $mode['nom'];  // curmode value is correct. May become $currentMode value
+				$curTemperature = $mode['temp'];
 
 				// indique la nouvelle température dans le slider
 				$options = array('slider'=>$curTemperature);
@@ -438,25 +458,26 @@ class mcztherm extends eqLogic {
 			}
 		
 
-			// Teste si on est à un changement de mode (jour/nuit)
-			$curmode = $mcztherm::testChangeModeJourNuit($mcztherm);
-			if ($curmode == 1) { return; }      // conditions d'heure invalide
-			if ($curmode != '') {  
-				$currentMode = $curmode;  // curmode value is correct. May become $currentMode value
-
-				$curTemperature = $mcztherm->getConfiguration('TempMode' . $curmode);
+			// Teste si on est à un changement de mode
+			$newMode = $mcztherm::testChangeMode($mcztherm);
+			// //log::add('mcztherm','debug', 'newMode => ' . json_encode($newMode));
+			if (is_array($newMode)) {  
+				$currentMode = $newMode['nom'];  // curmode value is correct. May become $currentMode value
+				$newTemperature = $newMode['temp'];
 				// indique la nouvelle température dans le slider
-				$options = array('slider'=>$curTemperature);
+				$options = array('slider'=>$newTemperature);
 				$cmdhb = $mcztherm->getCmd(null,'T_consigne');
 				cmd::byString('#'. $cmdhb->getHumanName() .'#')->execCmd($options, $cache = 0);
 
 				$mcztherm->setCache('lastAction', date('Y-m-d H:i:00'));
 				$mcztherm->setCache('currentMode', $currentMode);											
-			}										
+			}
 
 			// Récupère l'info de consigne de température
 			$cmdhb = $mcztherm->getCmd(null,'T_consigne_info');
 			$consigneTemperature = cmd::byString('#'. $cmdhb->getHumanName() .'#')->execCmd();
+
+			log::add('mcztherm','debug', 'Actual: Mode => ' . $currentMode . ' Temp => ' . $consigneTemperature);
 
 			// Détermination de la tendance de chauffe pour le calcul de l'hystéresis
 			$curconsigne = $mcztherm->getCache('currentConsigne', '');
@@ -606,23 +627,11 @@ class mcztherm extends eqLogic {
 		}
 
 		//Generaltab: Modes ...
-		if ($this->getConfiguration('CheckModeJour') === '') {
-			$this->setConfiguration('CheckModeJour', 1);
-		}
-		if ($this->getConfiguration('TempModeJour') === '') {
-			$this->setConfiguration('TempModeJour', 21);
-		}
-		if ($this->getConfiguration('HeureModeJourStart') === '') {
-			$this->setConfiguration('HeureModeJourStart', '06:30');
-		}
-		if ($this->getConfiguration('CheckModeNuit') === '') {
-			$this->setConfiguration('CheckModeNuit', 1);
-		}
-		if ($this->getConfiguration('TempModeNuit') === '') {
-			$this->setConfiguration('TempModeNuit', 18);
-		}
-		if ($this->getConfiguration('HeureModeNuitStart') === '') {
-			$this->setConfiguration('HeureModeNuitStart', '21:30');
+		if ($this->getConfiguration('mode') === '') {
+			$modes = array();
+			$modes[] = array( 'nom' => 'Jour', 'active' => '1', 'temp' => '21', 'time' => '05:30');
+			$modes[] = array('nom' => 'Nuit', 'active' => '1', 'temp' => '15', 'time' => '22:30');
+			$this->setConfiguration('mode', $modes);
 		}
 
 		// Infostab: Attente sur état

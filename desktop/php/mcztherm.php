@@ -68,8 +68,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 			<li role="presentation"><a href="#cmdstab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i>{{Commandes du poêle}}</a></li>
 			<li role="presentation"><a href="#commandtab" aria-controls="profile" role="tab" data-toggle="tab"><i class="fa fa-list-alt"></i>{{Commandes}}</a></li>
 		</ul>
-		<div class="tab-content" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
 
+		<div class="tab-content" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
 			<!--- tab: eqlogictab --->
 			<div role="tabpanel" class="tab-pane active" id="eqlogictab">
 				<br/>
@@ -118,8 +118,27 @@ $eqLogics = eqLogic::byType($plugin->getId());
 						</div>
 					</fieldset>
 				</form>
+
 				<!--- Modes --->
 				<legend><i class="fas"></i> {{Modes}}</legend>
+				<form class="form-horizontal">
+					<fieldset>
+						<div class="form-group">
+								<a class="btn btn-success pull-right addMode col-xs-2" data-type="mode"><i class="fas fa-plus-circle"></i> {{Ajouter un mode}}</a>
+						</div>
+
+						<div class="form-group">
+							<fieldset>
+								<div id="div_mode" class="col-xs-10 col-xs-offset-2">
+								</div>
+							</fieldset>
+						</div>
+					</fieldset>
+				</form>
+				<br>
+
+
+<!---  new code replace this 
 				<form class="form-horizontal">
 					<fieldset>
 						<div class="form-group">
@@ -156,6 +175,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
 						</div>
 					</fieldset>
 				</form>
+--->
+
 				<!--- Sondes --->
 				<legend><i class="fas"></i> {{Sondes}}</legend>
 				<form class="form-horizontal">
@@ -173,7 +194,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
-<!---
 						<div class="form-group">
 							<label class="col-sm-3 control-label">{{Sonde extérieure}}(-)</label>
 							<div class="col-sm-4">
@@ -187,9 +207,9 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>
---->
 					</fieldset>
 				</form>
+
 				<!--- Divers --->
 				<legend><i class="fas"></i> {{Divers}}</legend>
 				<form class="form-horizontal">
@@ -198,7 +218,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 							<label class="col-sm-3 control-label">{{Commande message}}</label>
 							<div class="col-sm-4">
 								<div class="input-group">
-									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="CmdMessage" placeholder="{{Commande message}}"/>
+									<input class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="CmdMessage" placeholder="{{Envoi de message}}"/>
 									<span class="input-group-btn">
 										<a class="btn btn-default" id="bt_selectCmdMessage" title="{{Sélectionner une commande}}">
 											<i class="fa fa-list-alt"></i>

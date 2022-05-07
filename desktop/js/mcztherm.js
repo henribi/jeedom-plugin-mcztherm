@@ -25,6 +25,11 @@ $('.addAction').off('click').on('click', function () {
   addAction({}, $(this).attr('data-type'));
 });
 
+$('.addMode').off('click').on('click', function () {
+  addMode({});
+});
+
+
 $("body").off('click','.bt_removeAction').on('click','.bt_removeAction',function () {
   var type = $(this).attr('data-type');
   $(this).closest('.' + type).remove();
@@ -40,6 +45,16 @@ $("body").off('click','.listCmdAction').on('click','.listCmdAction', function ()
     });
   });
 });
+
+$("body").off('click','.removeMode').on('click','.removeMode',function () {
+  var el = $(this);
+  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer ce mode}} ?', function (result) {
+    if (result !== null) {
+      el.closest('.mode').remove();
+    }
+  });
+});
+
 
 function addAction(_action, _type) {
   var div = '<div class="' + _type + '">';
@@ -64,6 +79,31 @@ function addAction(_action, _type) {
   $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr');
 }
 
+function addMode(_info) {
+  var div = '<div class="mode">';
+  div += '<div class="form-group ">';
+  div += '<label class="col-sm-1 control-label">{{Nom}}</label>';
+  div += '<div class="col-sm-1">';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="nom" />';
+  div += '</div>';
+  div += '<div class="col-sm-1">';
+  div += '<label class="checkbox-inline"><input type="checkbox" class="expressionAttr cmdInfo" data-l1key="active"/>{{Actif}}</label></span>';
+  div += '</div>';
+  div += '<label class="col-sm-2 control-label">{{Temperature}} <sub>(°C)</sub></label>';
+  div += '<div class="col-sm-1">';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="temp"/>';
+  div += '</div>';
+  div += '<label class="col-sm-2 control-label">{{Heure}} <sub>(hh:mm)</sub></label>';
+  div += '<div class="col-sm-1">';
+  div += '<input class="expressionAttr form-control cmdInfo" data-l1key="time" />';
+  div += '</div>';
+  div += ' <a class="btn btn-danger btn-xs removeMode pull-right"><i class="fas fa-minus-circle"></i> {{Supprimer mode}}</a> ';
+  div += '</div>';
+  $('#div_mode').append(div);
+  $('#div_mode .mode').last().setValues(_info, '.expressionAttr');
+}
+
+
 function saveEqLogic(_eqLogic) {
   if (!isset(_eqLogic.configuration)) {
     _eqLogic.configuration = {};
@@ -73,6 +113,8 @@ function saveEqLogic(_eqLogic) {
   _eqLogic.configuration.P3 = $('#div_p3 .p3').getValues('.expressionAttr');
   _eqLogic.configuration.P4 = $('#div_p4 .p4').getValues('.expressionAttr');
   _eqLogic.configuration.P0 = $('#div_p0 .p0').getValues('.expressionAttr');
+  _eqLogic.configuration.mode = $('#div_mode .mode').getValues('.expressionAttr');
+
   return _eqLogic;
 }
 
@@ -82,6 +124,8 @@ function printEqLogic(_eqLogic) {
   $('#div_p3').empty();
   $('#div_p4').empty();
   $('#div_p0').empty();
+  $('#div_mode').empty();
+
   if (isset(_eqLogic.configuration)) {
     if (isset(_eqLogic.configuration.P1)) {
       for (var i in _eqLogic.configuration.P1) {
@@ -106,6 +150,11 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.P0)) {
       for (var i in _eqLogic.configuration.P0) {
         addAction(_eqLogic.configuration.P0[i], 'p0');
+      }
+    }
+    if (isset(_eqLogic.configuration.mode)) {
+      for (var i in _eqLogic.configuration.mode) {
+        addMode(_eqLogic.configuration.mode[i]);
       }
     }
   }
