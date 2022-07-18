@@ -8,6 +8,8 @@
 	"category" : "wellness",
 	"changelog" : "https:\/\/henribi.github.io\/jeedom-plugin-mcztherm\/#language#\/changelog",
 	"documentation" : "https:\/\/henribi.github.io\/jeedom-plugin-mcztherm\/#language#\/",
+	"changelog_beta" : "https:\/\/henribi.github.io\/jeedom-plugin-mcztherm\/#language#\/changelog",
+	"documentation_beta" : "https:\/\/henribi.github.io\/jeedom-plugin-mcztherm\/#language#\/",
 	"language" : ["fr_FR"],
 	"compatibility" : [
 		"miniplus",
