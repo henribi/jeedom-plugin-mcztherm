@@ -87,7 +87,7 @@ class mcztherm extends eqLogic {
 		$currentConsigneVal = intval(substr($mcztherm->getCache('currentConsigne', ''), -1));
 		log::add('mcztherm','debug',' - P active: ' . $puissanceActiveVal . '   cur Consigne: ' . $currentConsigneVal);
 		if ($puissanceActiveVal == $currentConsigneVal) {
-			// Teste si la même consigne. Si,ou ne fait rien et quitte.
+			// Teste si la même consigne. Si,oui ne fait rien et quitte.
 			if ($mcztherm->getCache('currentConsigne', '') == $consigne) { 
 				log::add('mcztherm','debug','- Consigne ' . $consigne . ' déjà activée');
 				return; 
@@ -164,6 +164,7 @@ class mcztherm extends eqLogic {
 		}
 	}
 
+
 	private static function getCmdInfoValue($mcztherm, $cfgname) {
 		// mcztherm: eqlogic
 		// cfgname:  nom de la varaiable de configuration
@@ -199,7 +200,7 @@ class mcztherm extends eqLogic {
 
 
 	private static function testMode($mcztherm) {
-		// test mode to apply at start
+		// test mode to apply at currrent time
 		// mcztherm:  eqLogic
 		// return:  mode array
 		$returnval = array();
@@ -370,8 +371,6 @@ class mcztherm extends eqLogic {
 		return($returnval);
 	}
 
-
-
 	private static function testLastOffDelay($mcztherm) {
 		// return: 0: delai minimum passé   1: délai pas dépassé ==> attendre
 		$returnval = 0;
@@ -385,9 +384,51 @@ class mcztherm extends eqLogic {
 		return($returnval);
 	}
 
+	// *************************** Public functions **************************
+
+	public static function processEteindre($equipement) {
+		$mcztherm = eqLogic::byId($equipement);
+		log::add('mcztherm','debug','Execution de la fonction processEteindre');
+		// Teste si le poele est eteint
+		// Si non, eteint le poele.
+		if ($mcztherm->getConfiguration('InfoEtatPoele') != '') {
+			$cmdEtat = cmd::byId(str_replace('#','',$mcztherm->getConfiguration('InfoEtatPoele')))->execCmd();
+			if ($cmdEtat != $mcztherm->getConfiguration('EtatOff')) {
+				log::add('mcztherm','debug','Envoi commande off');
+				// Extinction du poele.  Envoi commande OFF
+				$cmdOff = $mcztherm->getConfiguration('CmdOffPoele');
+				try {
+					$cmd = cmd::byId(str_replace('#', '', $cmdOff));
+					log::add('mcztherm','info','  - Action:  ' . cmd::byId(str_replace('#', '', $cmdOff))->getHumanName() );
+					if (is_object($cmd) && $mcztherm->getId() != $cmd->getEqLogic_id()) {
+						$options = array();
+						if (isset($action['options'])) {
+							$options = $action['options'];
+							foreach ($options as $key => $value) {
+								$options[$key] = str_replace('#slider#', $consigne, $value);
+							}
+						}
+						scenarioExpression::createAndExec('action', $cmdOff, $options);
+					}
+				} catch (Exception $e) {
+					log::add('mcztherm', 'error', $mcztherm->getHumanName() . __(' : Erreur lors de l\'éxecution de ', __FILE__) . $cmdOff . __('. Détails : ', __FILE__) . getMessage());
+				}
+				// Indiquer currentConsigne,  currentMode
+				mcztherm::processConsigneCommands($mcztherm, 'P0');
+				// Récupère l'info de consigne de température
+				$cmdhb = $mcztherm->getCmd(null,'T_consigne_info');
+				$consigneTemperature = cmd::byString('#'. $cmdhb->getHumanName() .'#')->execCmd();
+				mcztherm::processTempCommand($mcztherm, $consigneTemperature);
+				log::add('mcztherm','debug', 'Eteindre: Mode => P0  Temp => ' . $consigneTemperature);
+
+
+			}
+		}
+	}
 
 
 	public static function nextexec($equipement) {
+		// currentMode est le nom du mode (jour, nuit, lever, ....)
 		$mcztherm = eqLogic::byId($equipement);
 		log::add('mcztherm','debug','Execution de la fonction nextexec');
 		//log::add('mcztherm','debug', 'mode => ' . json_encode($mcztherm->getConfiguration('mode')));
@@ -418,12 +459,13 @@ class mcztherm extends eqLogic {
 			}											
 		}
 
+
 		if ($cmdValue == 1) { // mcztherm sur On
 			$lastAction = $mcztherm->getCache('lastAction', '');
 			$currentMode = $mcztherm->getCache('currentMode', '');											
 			//log::add('mcztherm','debug','** Infos(begin): lastAction: ' . $lastAction . ' currentMode: ' . $currentMode);
 
-			// Teste si etat reporte une erreur ==> Notification
+			// Teste si etat reporte une erreur ==> Notification (no reaction)
 			mcztherm::testEtatError($mcztherm);
 
 			// Examine si mode d'exclusion de l'état de la commande info 
@@ -436,8 +478,22 @@ class mcztherm extends eqLogic {
 			// recupere les variables de fonctionnement en cache heure, mode
 			$lastAction = $mcztherm->getCache('lastAction', '');
 			$currentMode = $mcztherm->getCache('currentMode', '');											
-			//log::add('mcztherm','info',' - Infos: lastAction: ' . $lastAction . ' currentMode: ' . $currentMode );
+			log::add('mcztherm','info',' - Infos: lastAction: ' . $lastAction . ' currentMode: ' . $currentMode );
 
+			//@@@@
+			/***
+			// Faux:   On ne dispose pas d'une info avec la puissance demandée ....    currentMode est le nom du mode (jour, nuit, lever, ....)
+
+			// Récupère le profil actif du poêle et le compare à la currentConsigne.
+			$puissanceActiveVal = intval(substr($mcztherm::getCmdInfoValue($mcztherm, 'InfoPuissancePoele'), -1));
+			$currentModeVal = intval(substr($mcztherm->getCache('currentMode', ''), -1));
+			log::add('mcztherm','debug',' - P active: ' .  . '   cur Mode: ' . $currentModeVal);
+			if ($puissanceActiveVal != $currentModeVal) {
+			log::add('mcztherm','debug',' - Correction - Nouveau currentMode: P'. $puissanceActiveVal);
+			//$currentMode = 'P' . $puissanceActiveVal;
+			}
+			***/
+			// end @@@@
 
 			if ($lastAction == '1970-01-01 00:00:00') {
 				// Determine quel mode choisir en fonction de l'heure et récupère la consigne et la température.
@@ -472,6 +528,27 @@ class mcztherm extends eqLogic {
 				$mcztherm->setCache('lastAction', date('Y-m-d H:i:00'));
 				$mcztherm->setCache('currentMode', $currentMode);											
 			}
+
+			// @@@@
+			// Verifier si le currentmode est toujours valide.  Un changement peut avoir été effectué ....
+			$checkMode = $mcztherm::testMode($mcztherm);
+			log::add('mcztherm','debug', 'CheckMode => ' . json_encode($newMode));
+			if (is_array($checkMode)) {  
+				if ($currentMode != $checkMode['nom']) {
+					$currentMode = $checkMode['nom'];  // curmode value is correct. May become $currentMode value
+					$newTemperature = $checkMode['temp'];
+					// indique la nouvelle température dans le slider
+					$options = array('slider'=>$newTemperature);
+					$cmdhb = $mcztherm->getCmd(null,'T_consigne');
+					cmd::byString('#'. $cmdhb->getHumanName() .'#')->execCmd($options, $cache = 0);
+
+					$mcztherm->setCache('lastAction', date('Y-m-d H:i:00'));
+					$mcztherm->setCache('currentMode', $currentMode);											
+				}
+			}
+			// end @@@@
+
+
 
 			// Récupère l'info de consigne de température
 			$cmdhb = $mcztherm->getCmd(null,'T_consigne_info');
@@ -923,6 +1000,27 @@ class mcztherm extends eqLogic {
 		$info->setSubType('string');
 		$info->save();
 
+		$action = $this->getCmd(null, 'eteindre');
+		if (!is_object($action)) {
+			$action = new mczthermCmd();
+			$action->setLogicalId('eteindre');
+			$action->setName(__('Eteindre', __FILE__));
+			//$action->setTemplate('dashboard','mcztherm::mcztoggle');
+			//$action->setTemplate('mobile','mcztherm::mcztoggle');
+			//$action->setDisplay('showNameOndashboard','0');
+			//$action->setDisplay('showNameOnmobile','0');
+			// $action->setDisplay('forceReturnLineAfter','1');
+		}
+		$action->setOrder($order++);
+		$action->setEqLogic_id($this->getId());
+		$action->setValue($info->getId());
+		$action->setConfiguration('updateCmdId', $info->getId());
+		$action->setConfiguration('updateCmdToValue', 0);
+		$action->setType('action');
+		$action->setSubType('other');
+		$action->save();
+
+
 
 
 	}
@@ -982,8 +1080,14 @@ class mczthermCmd extends cmd {
 	public function execute($_options = array()) {
 		//log::add('mcztherm','debug','Exécution de la fonction Execute');
 		$eqlogic = $this->getEqLogic()->getId();
-		
-		// Action sur modification du slider
+		$action = $this->getLogicalId();
+
+		if ($action == 'eteindre') {
+			log::add('mcztherm','debug','- @@@@@ Action Eteindre');
+			mcztherm::processEteindre($eqlogic);
+		}
+		else {
+			// Action sur modification du slider
 			switch ($this->getSubType()) {
 				case 'other':
 					//log::add('mcztherm','debug','- Action sur Other');
@@ -1001,6 +1105,7 @@ class mczthermCmd extends cmd {
 					$virtualCmd->event($result);	
 				break;
 			}
+		}
 	}
 
 	/* **********************Getteur Setteur*************************** */
