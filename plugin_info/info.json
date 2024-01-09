@@ -12,8 +12,8 @@
 	"documentation_beta" : "https:\/\/henribi.github.io\/jeedom-plugin-mcztherm\/#language#\/",
 	"language" : ["fr_FR"],
 	"compatibility" : [
-		"miniplus",
 		"smart",
+		"atlas",
 		"rpi",
 		"docker",
 		"diy",

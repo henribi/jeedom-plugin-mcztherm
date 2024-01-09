@@ -16,6 +16,16 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// code date:  12/08/2023
+
+/* to do
+*  si mcztherm activé manuellement mais daemon pas actif ==>  le lancer.  C'est pas le cas
+*		faudrait ajouter un test daemon actif ? avant "test si equipement sur off"  
+*
+*
+*/
+
+
 /* * ***************************Includes********************************* */
 require_once __DIR__ . '/../../../../core/php/core.inc.php';
 
@@ -165,6 +175,7 @@ class mcztherm extends eqLogic {
 	}
 
 
+
 	private static function getCmdInfoValue($mcztherm, $cfgname) {
 		// mcztherm: eqlogic
 		// cfgname:  nom de la varaiable de configuration
@@ -296,6 +307,15 @@ class mcztherm extends eqLogic {
 			$cmdValue = $cmd->execCmd();
 			if ($cmdValue == 1) { // activation est On
 				//log::add('mcztherm', 'debug', '- Activation est sur ON');
+				//teste si daemon est demarré ?   Si non, le demarre
+				$mczremote = plugin::byId('mczremote');
+				$mczremoteinfos = $mczremote->deamon_info();
+				if ($mczremoteinfos['state'] == 'nok') {
+					log::add('mcztherm','debug',' - (Activation) Start MCZ Remote Daemon');
+					$mczremote->deamon_start();
+				} 
+
+
 				$heure = $mcztherm->getCmd(null,'horaire')->execCmd();
 				// skip si heure est à 0000
 				if ($heure == '0000')  {
@@ -427,12 +447,35 @@ class mcztherm extends eqLogic {
 	}
 
 
+	public static function processStopDaemon() {
+		//log::add('mcztherm','debug','Execution de la fonction processStopDaemon');
+		$mczremote = plugin::byId('mczremote');
+		$mczremoteinfos = $mczremote->deamon_info();
+		//foreach ($mczremoteinfos as $key => $value) {
+		//	log::add('mcztherm','debug',$key . '---' . $value);
+		//}
+		if ($mczremoteinfos['state'] == 'ok') {
+			log::add('mcztherm','debug','Stop MCZ Remote Daemon');
+			$mczremote->deamon_stop();
+		} else {
+			log::add('mcztherm','debug','MCZ Remote Daemon  already stopped');
+		}
+	}
+
+	public static function processStartDaemon() {
+		//log::add('mcztherm','debug','Execution de la fonction processStartDaemon');
+		$mczremote = plugin::byId('mczremote');
+		$mczremote->deamon_start();
+	}
+
+
+
 	public static function nextexec($equipement) {
 		// currentMode est le nom du mode (jour, nuit, lever, ....)
 		$mcztherm = eqLogic::byId($equipement);
 		log::add('mcztherm','debug','Execution de la fonction nextexec');
 		//log::add('mcztherm','debug', 'mode => ' . json_encode($mcztherm->getConfiguration('mode')));
-		if ($mcztherm->getIsEnable() != 1) { // Si l'équipement est-il inactif ==> quit
+		if ($mcztherm->getIsEnable() != 1) { // Si l'équipement est inactif ==> quit
 			return;
 		}
 		$cmd = $mcztherm->getCmd(null,'etat');  // Retourne la commande "etat" si elle existe
@@ -529,7 +572,7 @@ class mcztherm extends eqLogic {
 				$mcztherm->setCache('currentMode', $currentMode);											
 			}
 
-			// @@@@
+
 			// Verifier si le currentmode est toujours valide.  Un changement peut avoir été effectué ....
 			$checkMode = $mcztherm::testMode($mcztherm);
 			log::add('mcztherm','debug', 'CheckMode => ' . json_encode($newMode));
@@ -546,8 +589,6 @@ class mcztherm extends eqLogic {
 					$mcztherm->setCache('currentMode', $currentMode);											
 				}
 			}
-			// end @@@@
-
 
 
 			// Récupère l'info de consigne de température
@@ -821,7 +862,9 @@ class mcztherm extends eqLogic {
 		$info->save();
 
 		$action = $this->getCmd(null, 't_consigne');
-		if (!is_object($action)) {
+		if (!is_object($action)) {     
+			// Si la commande n'existe pas -> Elle est créée
+			// Mettre ici les éléments que l'utilisateur peut modifier
 			$action = new mczthermCmd();
 			$action->setLogicalId('t_consigne');
 			$action->setName(__('T_consigne', __FILE__));
@@ -832,6 +875,7 @@ class mcztherm extends eqLogic {
 			$action->setDisplay('showNameOndashboard','0');
 			$action->setDisplay('showNameOnmobile','0');
 		}
+		// Les éléments ci-dessous sont mis à jour lors de chaque save de l'équipement
 		$action->setOrder($order++);
 		$action->setEqLogic_id($this->getId());
 		$action->setConfiguration('infoName', $info->getId());
@@ -1020,6 +1064,49 @@ class mcztherm extends eqLogic {
 		$action->setSubType('other');
 		$action->save();
 
+		$action = $this->getCmd(null, 'startdaemon');
+		if (!is_object($action)) {
+			$action = new mczthermCmd();
+			$action->setLogicalId('startdaemon');
+			$action->setName(__('Start Daemon', __FILE__));
+			//$action->setTemplate('dashboard','mcztherm::mcztoggle');
+			//$action->setTemplate('mobile','mcztherm::mcztoggle');
+			//$action->setDisplay('showNameOndashboard','0');
+			//$action->setDisplay('showNameOnmobile','0');
+			// $action->setDisplay('forceReturnLineAfter','1');
+			$action->setDisplay('forceReturnLineBefore','1');
+
+		}
+		$action->setOrder($order++);
+		$action->setEqLogic_id($this->getId());
+		$action->setValue($info->getId());
+		$action->setConfiguration('updateCmdId', $info->getId());
+		$action->setConfiguration('updateCmdToValue', 0);
+		$action->setType('action');
+		$action->setSubType('other');
+		$action->save();
+
+		$action = $this->getCmd(null, 'stopdaemon');
+		if (!is_object($action)) {
+			$action = new mczthermCmd();
+			$action->setLogicalId('stopdaemon');
+			$action->setName(__('Stop Daemon', __FILE__));
+			//$action->setTemplate('dashboard','mcztherm::mcztoggle');
+			//$action->setTemplate('mobile','mcztherm::mcztoggle');
+			//$action->setDisplay('showNameOndashboard','0');
+			//$action->setDisplay('showNameOnmobile','0');
+			// $action->setDisplay('forceReturnLineAfter','1');
+		}
+		$action->setOrder($order++);
+		$action->setEqLogic_id($this->getId());
+		$action->setValue($info->getId());
+		$action->setConfiguration('updateCmdId', $info->getId());
+		$action->setConfiguration('updateCmdToValue', 0);
+		$action->setType('action');
+		$action->setSubType('other');
+		$action->save();
+
+
 
 
 
@@ -1083,8 +1170,16 @@ class mczthermCmd extends cmd {
 		$action = $this->getLogicalId();
 
 		if ($action == 'eteindre') {
-			log::add('mcztherm','debug','- @@@@@ Action Eteindre');
+			//log::add('mcztherm','debug','- @@@@@ Action Eteindre');
 			mcztherm::processEteindre($eqlogic);
+		}
+		else if ($action == 'startdaemon') {
+			//log::add('mcztherm','debug','- @@@@@ Action Start MCZ Remote Daemon');
+			mcztherm::processStartDaemon();
+		}
+		else if ($action == 'stopdaemon') {
+			//log::add('mcztherm','debug','- @@@@@ Action Stop MCZ Remote Daemon');
+			mcztherm::processStopDaemon();
 		}
 		else {
 			// Action sur modification du slider

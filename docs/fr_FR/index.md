@@ -6,12 +6,14 @@ Ses principales fonctionnalités sont:
    -  module le niveau de chauffe en fonction de la différence entre la température de consigne et la température ambiante
    -  gére deux mode de chauffe: Jour et Nuit
    -  dispose d'un mode **hystérésis**
-   -  utilise le module python pour dialoguer avec un poêle MCZ Maestro via MQTT
+   -  utilise le plugin MCZRemote pour dialoguer avec un poêle MCZ Maestro via MQTT
    -  conçu pour permettre un démarrage différé dans une seconde résidence
    -  permet de synchroniser l'heure du poele avec celle de Jeedom
 
 
 Le mode **hystérésis** permet de gérer l’allumage et l’extinction du chauffage en fonction de la température intérieure, par rapport à un seuil correspondant à la consigne. L’hystérésis permet d’éviter des séquences arrêts, allumages trop fréquentes lorsque la température est autour la consigne.
+
+Ce plugin n'est pas disponible sur le market mais peut être installé à partir de GitHub.  Se référer à la procédure en fin de ce document.
 
 # Configuration
 
@@ -32,6 +34,10 @@ Le bouton Activation vous permet de prévoir une activation automatique du therm
 Ceci permet entre autre d'activer, en pleine nuit, le thermostat et le poêle de la seconde résidence afin d'avoir une température agréable à votre arrivée le lendemain.
 
 Ce bouton Activation est automatiquement désactivé après utilisation.
+
+Le bouton éteindre permet de demander une extinction du poêle. Il faut penser à désactiver le thermostat. Autrement, le poêle se réallumara en fonction des conditions de température.
+
+Les boutons Start daemon et Stop daemon permettent de démarrer ou stopper le démon du plugin MCZremote.
 
 ## La création d’un thermostat en détail
 
@@ -106,7 +112,9 @@ Il faut définir dans MQTT une commande action, defaut, topic: SUBmcz avec comme
 
 > **Attention**
 >
-> Cette commande nécessite une version modifiée du script python maestro.py.  Le script doit traiter la commande 9001 pour envoyer la commande C|SalvaDataOra|DDMMYYYYHHmm
+> Cette commande nécessite une version modifiée du script python maestro.py.  Le script doit traiter la commande 9001 pour envoyer la commande C|SalvaDataOra|DDMMYYYYHHmm.
+> 
+>Elle est supportée par le plugin MCZremote
 >
 
 
@@ -140,5 +148,50 @@ Si la température ambiante est inférieure au seuil de l'arrêt: 20,5°C (21 - 
 Une ligne avec toutes les valeurs calculées est disponible dans le log en mode debug. 
 
 
+## Démon de MCZremote
+
+Lorsque l'on est pas présent à la seconde résidence pour une longue période, je trouve inutile que le démon du plugin MCZremote dialogue avec les serveur de MCZ.
+La configuration du démon est donc faite en mode gestion automatique inactive.
+
+Dès que l'on demande une activation ou allume le poêle, le programme vérifie le statut du démon du plugin MCZremote. S'il est inactif, il l'active.
+
+L'arrêt du démon reste toujours une opération manuelle.
+
+
+# Installation
+
+Il faut l'installer à partir d'un dépôt Github.
+
+> **Attention**
+>
+>Il n’y a pas d’assistance de l’équipe Jeedom sur les plugins installés depuis une autre source que le Market Jeedom. De plus, l’installation d’un plugin depuis une autre source que le Market Jeedom entraine la perte globale d’assistance par l’équipe Jeedom.
+>
+
+Cela nécessite une configuration.  Via Les menus *Réglages*, *Systèmes*, *Configuration* suivi de l'onglet *Mises à jour/Market*, dans la zone *Configuration des dépôts*, sélectionner *Github*.  A ce niveau, il faut valider **Activer Github**
+
+Sauvergardez la configuration et allez dans le menu *Plugins*, *Gestion des plugins*
+
+Sélectionnez le **+** pour ajouter un plugin.
+
+![Installation plugin](../images/depot_github.png)
+
+Commencez par choisir *Github* dans le *Type de source*.
+
+Les champs de configuration du dépôt Github sont alors visibles.
+
+Entrez les informations suivantes pour les différents champs.
+
+| | |
+|---|---|
+|ID logique du plugin|mcztherm|
+|Utilisateur ou ...|henribi|
+|Nom du dépôt|jeedom-plugin-mcztherm|
+|Branche|master|
+
+Sauvegardez et allez dans un autre menu.
+
+Revenez dans le menu *Gestion des plugins*.  Le plugin MCZtherm est maintenant visible.
+
+Il vous reste à fournir les paramètres de configuration. 
 
 
