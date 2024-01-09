@@ -16,14 +16,7 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// code date:  12/08/2023
-
-/* to do
-*  si mcztherm activé manuellement mais daemon pas actif ==>  le lancer.  C'est pas le cas
-*		faudrait ajouter un test daemon actif ? avant "test si equipement sur off"  
-*
-*
-*/
+// code date:  16/11/2023
 
 
 /* * ***************************Includes********************************* */
