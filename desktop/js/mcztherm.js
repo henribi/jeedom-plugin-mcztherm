@@ -19,6 +19,7 @@ $("#div_p1").sortable({axis: "y", cursor: "move", items: ".p1", placeholder: "ui
 $("#div_p2").sortable({axis: "y", cursor: "move", items: ".p2", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_p3").sortable({axis: "y", cursor: "move", items: ".p3", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_p4").sortable({axis: "y", cursor: "move", items: ".p4", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
+$("#div_p5").sortable({axis: "y", cursor: "move", items: ".p5", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 $("#div_p0").sortable({axis: "y", cursor: "move", items: ".p0", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true});
 
 $('.addAction').off('click').on('click', function () {
@@ -112,6 +113,7 @@ function saveEqLogic(_eqLogic) {
   _eqLogic.configuration.P2 = $('#div_p2 .p2').getValues('.expressionAttr');
   _eqLogic.configuration.P3 = $('#div_p3 .p3').getValues('.expressionAttr');
   _eqLogic.configuration.P4 = $('#div_p4 .p4').getValues('.expressionAttr');
+  _eqLogic.configuration.P5 = $('#div_p5 .p5').getValues('.expressionAttr');
   _eqLogic.configuration.P0 = $('#div_p0 .p0').getValues('.expressionAttr');
   _eqLogic.configuration.mode = $('#div_mode .mode').getValues('.expressionAttr');
 
@@ -123,6 +125,7 @@ function printEqLogic(_eqLogic) {
   $('#div_p2').empty();
   $('#div_p3').empty();
   $('#div_p4').empty();
+  $('#div_p5').empty();
   $('#div_p0').empty();
   $('#div_mode').empty();
 
@@ -145,6 +148,11 @@ function printEqLogic(_eqLogic) {
     if (isset(_eqLogic.configuration.P4)) {
       for (var i in _eqLogic.configuration.P4) {
         addAction(_eqLogic.configuration.P4[i], 'p4');
+      }
+    }
+    if (isset(_eqLogic.configuration.P5)) {
+      for (var i in _eqLogic.configuration.P5) {
+        addAction(_eqLogic.configuration.P5[i], 'p5');
       }
     }
     if (isset(_eqLogic.configuration.P0)) {

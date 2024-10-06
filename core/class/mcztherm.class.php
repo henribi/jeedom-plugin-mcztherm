@@ -16,7 +16,7 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// code date:  16/11/2023
+// code date:  06/10/2024
 
 
 /* * ***************************Includes********************************* */
@@ -306,6 +306,7 @@ class mcztherm extends eqLogic {
 				if ($mczremoteinfos['state'] == 'nok') {
 					log::add('mcztherm','debug',' - (Activation) Start MCZ Remote Daemon');
 					$mczremote->deamon_start();
+					// @@@@@ mcztherm::processStartDaemon();
 				} 
 
 
@@ -516,20 +517,21 @@ class mcztherm extends eqLogic {
 			$currentMode = $mcztherm->getCache('currentMode', '');											
 			log::add('mcztherm','info',' - Infos: lastAction: ' . $lastAction . ' currentMode: ' . $currentMode );
 
-			//@@@@
-			/***
-			// Faux:   On ne dispose pas d'une info avec la puissance demandée ....    currentMode est le nom du mode (jour, nuit, lever, ....)
-
-			// Récupère le profil actif du poêle et le compare à la currentConsigne.
-			$puissanceActiveVal = intval(substr($mcztherm::getCmdInfoValue($mcztherm, 'InfoPuissancePoele'), -1));
-			$currentModeVal = intval(substr($mcztherm->getCache('currentMode', ''), -1));
-			log::add('mcztherm','debug',' - P active: ' .  . '   cur Mode: ' . $currentModeVal);
-			if ($puissanceActiveVal != $currentModeVal) {
-			log::add('mcztherm','debug',' - Correction - Nouveau currentMode: P'. $puissanceActiveVal);
-			//$currentMode = 'P' . $puissanceActiveVal;
+			// Récupère l'etat du poêle.  Si "Puissance x" le compare à la currentConsigne.
+			//$puissanceActiveVal = intval(substr($mcztherm::getCmdInfoValue($mcztherm, 'InfoPuissancePoele'), -1));
+			$etatPoele = $mcztherm::getCmdInfoValue($mcztherm, 'InfoPuissancePoele');
+			log::add('mcztherm','debug', ' - EtatPoele:' . $etatPoele);
+			if(preg_match("/Puissance [0-5]/", $etatPoele )) {
+				$puissanceActiveVal = intval(substr($etatPoele, -1));
+			} else if(preg_match("/Eteint/", $etatPoele )) {
+				$puissanceActiveVal = 0;
 			}
-			***/
-			// end @@@@
+			$currentConsigneVal = intval(substr($mcztherm->getCache('currentConsigne', ''), -1));
+			log::add('mcztherm','debug',' - P active: ' . $puissanceActiveVal . '   Current Consigne: ' . $currentConsigneVal);
+			if ($puissanceActiveVal != $currentConsigneVal) {
+				log::add('mcztherm','debug',' - Correction - Nouveau currentConsigne: P'. $puissanceActiveVal);
+				$mcztherm->setCache('currentConsigne', 'P' . $puissanceActiveVal);
+			}
 
 			if ($lastAction == '1970-01-01 00:00:00') {
 				// Determine quel mode choisir en fonction de l'heure et récupère la consigne et la température.
@@ -606,6 +608,7 @@ class mcztherm extends eqLogic {
 			$TempP2 = $consigneTemperature + $mcztherm->getConfiguration('DeltaTempP2') + $hysterese;
 			$TempP3 = $consigneTemperature + $mcztherm->getConfiguration('DeltaTempP3') + $hysterese;
 			$TempP4 = $consigneTemperature + $mcztherm->getConfiguration('DeltaTempP4') + $hysterese;
+			$TempP5 = $consigneTemperature + $mcztherm->getConfiguration('DeltaTempP5') + $hysterese;
 
 			if (mcztherm::testWaitEtat($mcztherm) == 1) {
 				//log::add('mcztherm', 'debug','- Un des états trouvé ==> Attente boucle suivante');
@@ -616,7 +619,7 @@ class mcztherm extends eqLogic {
 
 			if ($tendance > 0) {
 				log::add('mcztherm', 'info', '-- T ambiante:' . $TempAmbiante . ' Demandée:' . $consigneTemperature .' Current Consigne ' . $curconsigne . '  Tendance:+ ');
-				log::add('mcztherm', 'info', ' - Seuils: Arret:' . $TempP0 . '  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4);
+				log::add('mcztherm', 'info', ' - Seuils: Arret:' . $TempP0 . '  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4 . '  P5:' . $TempP5);
 				if($TempAmbiante >= $TempP0) {
 					// arrêt du poele
 					//log::add('mcztherm','info',' -  passage en consigne arret');
@@ -647,17 +650,29 @@ class mcztherm extends eqLogic {
 					mcztherm::processConsigneCommands($mcztherm, 'P4');  // activer les consignes P4
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
-				} else if ($TempAmbiante < $TempP4){
+				} else if ($TempAmbiante >= $TempP5){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
-					//log::add('mcztherm','info',' -  passage en consigne P4max');
-					mcztherm::processConsigneCommands($mcztherm, 'P4');  // activer les consignes P4
+					//log::add('mcztherm','info',' -  passage en consigne P5');
+					mcztherm::processConsigneCommands($mcztherm, 'P5');  // activer les consignes P5
+					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
+					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
+				} else if ($TempAmbiante < $TempP5){
+					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
+					//log::add('mcztherm','info',' -  passage en consigne P5max');
+					mcztherm::processConsigneCommands($mcztherm, 'P5');  // activer les consignes P5
 					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
 					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
 				}
 			} else if ($tendance < 0) {
 				log::add('mcztherm', 'info', '-- T ambiante:' . $TempAmbiante . ' Demandée:' . $consigneTemperature . ' Current Consigne ' . $curconsigne . '  Tendance:- ');
-				log::add('mcztherm', 'info', ' - Seuils: Arret:---  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4);
-				if ($TempAmbiante < $TempP4){
+				log::add('mcztherm', 'info', ' - Seuils: Arret:---  P1:' . $TempP1 . '  P2:' . $TempP2 . '  P3:' . $TempP3 . '  P4:' . $TempP4 . '  P5:' . $TempP5);
+				if ($TempAmbiante < $TempP5){
+					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
+					//log::add('mcztherm','info',' -  passage en consigne P4');
+					mcztherm::processConsigneCommands($mcztherm, 'P5');  // activer les consignes P5
+					mcztherm::processTempCommand($mcztherm, $consigneTemperature);
+					mcztherm::processOn($mcztherm); // Test, Allumer le poele 
+				} else if ($TempAmbiante < $TempP4){
 					if (mcztherm::testLastOffDelay($mcztherm) == 1) { return; }  // Voir si allumage possible vu délai
 					//log::add('mcztherm','info',' -  passage en consigne P4');
 					mcztherm::processConsigneCommands($mcztherm, 'P4');  // activer les consignes P4
@@ -735,6 +750,9 @@ class mcztherm extends eqLogic {
 		}
 		if ($this->getConfiguration('DeltaTempP4') === '') {
 			$this->setConfiguration('DeltaTempP4', -5);
+		}
+		if ($this->getConfiguration('DeltaTempP5') === '') {
+			$this->setConfiguration('DeltaTempP5', -7);
 		}
 
 		//Generaltab: Modes ...

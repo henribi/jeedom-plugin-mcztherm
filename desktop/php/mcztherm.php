@@ -338,6 +338,24 @@ $eqLogics = eqLogic::byType($plugin->getId());
 								</div>
 							</div>
 						</div>						
+						<br/>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">{{Puissance 5}}</label>
+							<label class="col-sm-1 control-label">{{Seuil(°C)}}</label>
+							<div class="col-sm-2">
+								<div class="input-group">
+									<input class="eqLogicAttr form-control" style="width:75px" data-l1key="configuration" data-l2key="DeltaTempP5" placeholder="{{Delta temperature}}"/>
+								</div>
+							</div>
+							<a class="btn btn-default btn-xs pull-right addAction" data-type="p5" style="position: relative; top : 5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-offset-3">
+								<br/>
+								<div id="div_p5">
+								</div>
+							</div>
+						</div>						
 						<br/><br/>
 					</fieldset>
 				</form>
